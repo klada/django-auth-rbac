@@ -1,0 +1,38 @@
+[
+    {
+        "fields": {
+            "date_joined": "2012-06-25T19:51:01.082", 
+            "email": "admin@example.com", 
+            "first_name": "", 
+            "groups": [], 
+            "is_active": true, 
+            "is_staff": true, 
+            "is_superuser": true, 
+            "last_login": "2012-06-25T19:51:22.790", 
+            "last_name": "", 
+            "password": "pbkdf2_sha256$10000$o5AGp1sBK375$jeaIfp9QrPNVlERHVi0014/R9grTqPwg9N3RFrPKWjg=", 
+            "user_permissions": [], 
+            "username": "admin"
+        }, 
+        "model": "rbac.rbacuser", 
+        "pk": 1
+    }, 
+    {
+        "fields": {
+            "date_joined": "2012-06-25T19:53:01.185", 
+            "email": "", 
+            "first_name": "", 
+            "groups": [], 
+            "is_active": true, 
+            "is_staff": false, 
+            "is_superuser": false, 
+            "last_login": "2012-06-25T19:53:01.185", 
+            "last_name": "", 
+            "password": "pbkdf2_sha256$10000$o5AGp1sBK375$jeaIfp9QrPNVlERHVi0014/R9grTqPwg9N3RFrPKWjg=", 
+            "user_permissions": [], 
+            "username": "test"
+        }, 
+        "model": "rbac.rbacuser", 
+        "pk": 2
+    }
+]

@@ -1,0 +1,47 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+
+{% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/login.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static "rbac/css/base.css" %}" />
+{% endblock %}
+
+{% block bodyclass %}login{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block title %}{% trans 'Select RBAC session roles' %}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">{% trans 'Select RBAC session roles' %}</h1>
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block userlinks %}{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+
+{% if form.non_field_errors %}
+{% for error in form.non_field_errors|add:form.errors %}
+<p class="errornote">
+    {{ error }}
+</p>
+{% endfor %}
+{% endif %}
+
+<div id="content-main">
+<form action="." method="post">{% csrf_token %}
+    {% if form.active_roles.errors %}{{ form.active_roles.errors }}{% endif %}
+    <p>{% trans 'Please select one or more roles for this session:' %}</p>
+    {{ form.active_roles }}
+
+  <div class="rbac-submit-row">
+    <input type="submit" name="cancel" value="{% trans 'Cancel' %}" />
+    <input type="submit" name="submit" class="default" value="{% trans 'Apply' %}" />
+  </div>
+</form>
+</div>
+{% endblock %}

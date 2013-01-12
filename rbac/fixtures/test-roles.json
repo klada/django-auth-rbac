@@ -1,0 +1,156 @@
+[
+    {
+        "fields": {
+            "children": [
+                2, 
+                5
+            ], 
+            "create_date": "2012-11-23T14:12:37.546Z", 
+            "description": "", 
+            "name": "A", 
+            "permissions": [
+                [
+                    "test_role_a", 
+                    "rbac", 
+                    "rbacpermission"
+                ]
+            ], 
+            "touch_date": "2012-11-23T14:12:37.546Z"
+        }, 
+        "model": "rbac.rbacrole", 
+        "pk": 1
+    }, 
+    {
+        "fields": {
+            "children": [
+                6
+            ], 
+            "create_date": "2012-11-23T13:56:46.707Z", 
+            "description": "", 
+            "name": "B", 
+            "permissions": [
+                [
+                    "test_role_b", 
+                    "rbac", 
+                    "rbacpermission"
+                ]
+            ], 
+            "touch_date": "2012-11-23T13:56:46.707Z"
+        }, 
+        "model": "rbac.rbacrole", 
+        "pk": 2
+    }, 
+    {
+        "fields": {
+            "children": [
+                4
+            ], 
+            "create_date": "2012-11-23T12:43:00.167Z", 
+            "description": "", 
+            "name": "C", 
+            "permissions": [
+                [
+                    "test_role_c", 
+                    "rbac", 
+                    "rbacpermission"
+                ]
+            ], 
+            "touch_date": "2012-11-23T12:43:00.166Z"
+        }, 
+        "model": "rbac.rbacrole", 
+        "pk": 3
+    }, 
+    {
+        "fields": {
+            "children": [
+                5, 
+                7
+            ], 
+            "create_date": "2012-11-23T13:52:06.268Z", 
+            "description": "", 
+            "name": "D", 
+            "permissions": [
+                [
+                    "test_role_d", 
+                    "rbac", 
+                    "rbacpermission"
+                ]
+            ], 
+            "touch_date": "2012-11-23T13:52:06.268Z"
+        }, 
+        "model": "rbac.rbacrole", 
+        "pk": 4
+    }, 
+    {
+        "fields": {
+            "children": [], 
+            "create_date": "2012-11-23T12:38:05.387Z", 
+            "description": "", 
+            "name": "SSD1", 
+            "permissions": [
+                [
+                    "test_role_ssd_one", 
+                    "rbac", 
+                    "rbacpermission"
+                ]
+            ], 
+            "touch_date": "2012-11-23T12:38:05.387Z"
+        }, 
+        "model": "rbac.rbacrole", 
+        "pk": 5
+    }, 
+    {
+        "fields": {
+            "children": [], 
+            "create_date": "2012-11-23T12:39:39.719Z", 
+            "description": "", 
+            "name": "SSD2", 
+            "permissions": [
+                [
+                    "test_role_ssd_two", 
+                    "rbac", 
+                    "rbacpermission"
+                ]
+            ], 
+            "touch_date": "2012-11-23T12:39:39.719Z"
+        }, 
+        "model": "rbac.rbacrole", 
+        "pk": 6
+    }, 
+    {
+        "fields": {
+            "children": [], 
+            "create_date": "2012-11-23T12:39:44.691Z", 
+            "description": "", 
+            "name": "SSD3", 
+            "permissions": [
+                [
+                    "test_role_ssd_three", 
+                    "rbac", 
+                    "rbacpermission"
+                ]
+            ], 
+            "touch_date": "2012-11-23T12:39:44.690Z"
+        }, 
+        "model": "rbac.rbacrole", 
+        "pk": 7
+    }, 
+    {
+        "fields": {
+            "children": [], 
+            "create_date": "2012-11-23T12:39:47.971Z", 
+            "description": "", 
+            "name": "SSD4", 
+            "permissions": [
+                [
+                    "test_role_ssd_four", 
+                    "rbac", 
+                    "rbacpermission"
+                ]
+            ], 
+            "touch_date": "2012-11-23T12:39:47.971Z"
+        }, 
+        "model": "rbac.rbacrole", 
+        "pk": 8
+    }
+]

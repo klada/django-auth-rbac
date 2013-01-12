@@ -1,0 +1,13 @@
+#user-tools {
+    display: none;
+}
+
+.rbac-submit-row {
+    padding-top: 5px;
+    padding-left: 0px;
+    text-align: center;
+}
+
+.rbac-submit-row input[type="submit"].default {
+    float: none;
+}

@@ -1,0 +1,114 @@
+[
+    {
+        "fields": {
+            "content_type": [
+                "rbac", 
+                "rbacpermission"
+            ], 
+            "create_date": "2012-11-23T12:35:10.265Z", 
+            "description": "", 
+            "name": "test_role_a", 
+            "touch_date": "2012-11-23T12:35:10.265Z"
+        }, 
+        "model": "rbac.rbacpermission", 
+        "pk": 1
+    }, 
+    {
+        "fields": {
+            "content_type": [
+                "rbac", 
+                "rbacpermission"
+            ], 
+            "create_date": "2012-11-23T12:35:14.708Z", 
+            "description": "", 
+            "name": "test_role_b", 
+            "touch_date": "2012-11-23T12:35:14.707Z"
+        }, 
+        "model": "rbac.rbacpermission", 
+        "pk": 2
+    }, 
+    {
+        "fields": {
+            "content_type": [
+                "rbac", 
+                "rbacpermission"
+            ], 
+            "create_date": "2012-11-23T12:35:21.832Z", 
+            "description": "", 
+            "name": "test_role_c", 
+            "touch_date": "2012-11-23T12:35:21.832Z"
+        }, 
+        "model": "rbac.rbacpermission", 
+        "pk": 3
+    }, 
+    {
+        "fields": {
+            "content_type": [
+                "rbac", 
+                "rbacpermission"
+            ], 
+            "create_date": "2012-11-23T12:35:32.373Z", 
+            "description": "", 
+            "name": "test_role_d", 
+            "touch_date": "2012-11-23T12:35:32.372Z"
+        }, 
+        "model": "rbac.rbacpermission", 
+        "pk": 4
+    },
+    {
+        "fields": {
+            "content_type": [
+                "rbac", 
+                "rbacpermission"
+            ], 
+            "create_date": "2012-11-23T12:36:02.343Z", 
+            "description": "", 
+            "name": "test_role_ssd_one", 
+            "touch_date": "2012-11-23T12:36:02.343Z"
+        }, 
+        "model": "rbac.rbacpermission", 
+        "pk": 5
+    }, 
+    {
+        "fields": {
+            "content_type": [
+                "rbac", 
+                "rbacpermission"
+            ], 
+            "create_date": "2012-11-23T12:35:41.550Z", 
+            "description": "", 
+            "name": "test_role_ssd_two", 
+            "touch_date": "2012-11-23T12:35:41.550Z"
+        }, 
+        "model": "rbac.rbacpermission", 
+        "pk": 6
+    }, 
+    {
+        "fields": {
+            "content_type": [
+                "rbac", 
+                "rbacpermission"
+            ], 
+            "create_date": "2012-11-23T12:35:56.611Z", 
+            "description": "", 
+            "name": "test_role_ssd_three", 
+            "touch_date": "2012-11-23T12:35:56.611Z"
+        }, 
+        "model": "rbac.rbacpermission", 
+        "pk": 7
+    }, 
+    {
+        "fields": {
+            "content_type": [
+                "rbac", 
+                "rbacpermission"
+            ], 
+            "create_date": "2012-11-23T12:35:48.546Z", 
+            "description": "", 
+            "name": "test_role_ssd_four", 
+            "touch_date": "2012-11-23T12:35:48.546Z"
+        }, 
+        "model": "rbac.rbacpermission", 
+        "pk": 8
+    }
+]

@@ -1,0 +1,84 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-10-14 22:22+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#: models.py:41
+msgid "RBAC permission"
+msgstr "RBAC Berechtigung"
+
+#: models.py:42
+msgid "RBAC permissions"
+msgstr "RBAC Berechtigungen"
+
+#: models.py:76
+msgid "RBAC role"
+msgstr "RBAC Rolle"
+
+#: models.py:77
+msgid "RBAC roles"
+msgstr "RBAC Rollen"
+
+#: models.py:239
+msgid "RBAC role profile"
+msgstr "RBAC Rollenprofil"
+
+#: models.py:240
+msgid "RBAC role profiles"
+msgstr "RBAC Rollenprofile"
+
+#: models.py:303
+msgid "RBAC session"
+msgstr "RBAC Sitzung"
+
+#: models.py:304
+msgid "RBAC sessions"
+msgstr "RBAC Sitzungen"
+
+#: models.py:406
+msgid "RBAC Static Separation of Duty Constraint"
+msgstr ""
+
+#: models.py:407
+msgid "RBAC Static Separation of Duty Constraints"
+msgstr ""
+
+#: models.py:428
+msgid "RBAC user assignment"
+msgstr "RBAC Benutzerzuweisung"
+
+#: models.py:429
+msgid "RBAC user assignments"
+msgstr "RBAC Benutzerzuweisungen"
+
+#: templates/rbac/set_active_roles.html:13
+#: templates/rbac/set_active_roles.html:16
+msgid "Select RBAC session roles"
+msgstr "RBAC Sitzungsrollen auswählen"
+
+#: templates/rbac/set_active_roles.html:38
+msgid "Please select one or more roles for this session:"
+msgstr "Bitte wählen Sie eine oder mehrere Rollen für diese Sitzung:"
+
+#: templates/rbac/set_active_roles.html:42
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: templates/rbac/set_active_roles.html:44
+msgid "Apply"
+msgstr "Anwenden"

@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 
 class AbstractRbacUser(models.Model):
     """
@@ -84,37 +84,42 @@ class AbstractRbacUser(models.Model):
         return self.__rbac_backend.has_module_perms(self, app_label)
 
 
-class RbacUser(AbstractUser):
-    """
-    Adds extra RBAC functionality to Django's built-in User class.
-    
-    All RBAC-models will use this model when using 'django.contrib.auth'.
-    """
-    groups = None
-    user_permissions = None
-    __rbac_backend = None
-    
-    class Meta:
-        app_label = 'rbac'
-        db_table = 'auth_rbac_user'
+#Only define RbacUser when it is actually used. This avoids some ImportErrors
+# when using a custom user class.
+if settings.AUTH_USER_MODEL == "RbacUser":
+    from django.contrib.auth.models import AbstractUser
 
-    def get_all_roles(self):
+    class RbacUser(AbstractUser):
         """
-        Returns a list of roles which are assigned to this user. This list will
-        be used for providing role choices in RbacSessions, for example.
-
-        By default we only query the RbacUserAssignment for roles. If you have
-        any other sources for roles you can override this method. You just need
-        to make sure that this method returns a QuerySet!
-
-        @rtype: QuerySet
+        Adds extra RBAC functionality to Django's built-in User class.
+        
+        All RBAC-models will use this model when using 'django.contrib.auth'.
         """
-        from rbac.models import RbacRole
-        return RbacRole.objects.filter(rbacuserassignment__user=self)
+        groups = None
+        user_permissions = None
+        __rbac_backend = None
+        
+        class Meta:
+            app_label = 'rbac'
+            db_table = 'auth_rbac_user'
+
+        def get_all_roles(self):
+            """
+            Returns a list of roles which are assigned to this user. This list will
+            be used for providing role choices in RbacSessions, for example.
+
+            By default we only query the RbacUserAssignment for roles. If you have
+            any other sources for roles you can override this method. You just need
+            to make sure that this method returns a QuerySet!
+
+            @rtype: QuerySet
+            """
+            from rbac.models import RbacRole
+            return RbacRole.objects.filter(rbacuserassignment__user=self)
 
 
-    def get_all_permissions(self, obj=None):
-        if not self.__rbac_backend:
-            from rbac.backends import RbacUserBackend
-            self.__rbac_backend = RbacUserBackend()
-        return self.__rbac_backend.get_all_permissions(self)
+        def get_all_permissions(self, obj=None):
+            if not self.__rbac_backend:
+                from rbac.backends import RbacUserBackend
+                self.__rbac_backend = RbacUserBackend()
+            return self.__rbac_backend.get_all_permissions(self)

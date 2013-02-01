@@ -13,6 +13,8 @@ class AbstractRbacUser(models.Model):
     build-in admin.
     """
     __rbac_backend = None
+    USERNAME_FIELD = 'id'
+    REQUIRED_FIELDS = []
     
     class Meta:
         abstract = True

@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from logging import getLogger
+import itertools
 from Queue import Queue
 
 from django.db import connection, models
@@ -488,10 +489,7 @@ def _rbac_check_ssd_userassignment(ssd_roles_set, ssd_cardinality):
     parameters would break an existing RbacUserAssignment. 
     """
     #get the ids of the roles which apply to this SSD set
-    #ssd_roles_id = set(ssd_roles_set)
-    ssd_roles_id = str(tuple(ssd_roles_set))
-    #strip last comma from tuple
-    ssd_roles_id = ssd_roles_id.rstrip(",)") + ")"
+    ssd_roles_id = ', '.join(itertools.imap(lambda x: str(x), ssd_roles_set))
 
     sql = "SELECT\
             COUNT(role_id) AS ssd_cardinality\
@@ -507,7 +505,7 @@ def _rbac_check_ssd_userassignment(ssd_roles_set, ssd_cardinality):
              ON\
               (auth_rbac_roleprofile.parent_id=auth_rbac_userassignment_roles.rbacrole_id)\
              WHERE\
-              auth_rbac_roleprofile.child_id IN "+ssd_roles_id+"\
+              auth_rbac_roleprofile.child_id IN ("+ssd_roles_id+")\
              UNION \
              SELECT\
               rbacuserassignment_id,\
@@ -515,7 +513,7 @@ def _rbac_check_ssd_userassignment(ssd_roles_set, ssd_cardinality):
              FROM\
               auth_rbac_userassignment_roles\
              WHERE\
-              auth_rbac_userassignment_roles.rbacrole_id IN "+ssd_roles_id+"\
+              auth_rbac_userassignment_roles.rbacrole_id IN ("+ssd_roles_id+")\
             )\
            GROUP BY\
             rbacuserassignment_id\
@@ -549,9 +547,7 @@ def _rbac_check_role_ssd_ua(node_id, ssd_roles_set, ssd_cardinality):
     @raise ValidationError: When the SSD set specified by the provided
     parameters would break an existing RbacUserAssignment. 
     """
-    ssd_roles_id = str(tuple(ssd_roles_set))
-    #strip last comma from tuple
-    ssd_roles_id = ssd_roles_id.rstrip(",)") + ")"
+    ssd_roles_id = ', '.join(itertools.imap(lambda x: str(x), ssd_roles_set))
 
     sql = "SELECT\
             COUNT(role_id) AS ssd_cardinality\
@@ -567,7 +563,7 @@ def _rbac_check_role_ssd_ua(node_id, ssd_roles_set, ssd_cardinality):
              ON\
               (auth_rbac_roleprofile.parent_id=auth_rbac_userassignment_roles.rbacrole_id)\
              WHERE\
-              auth_rbac_roleprofile.child_id IN "+ssd_roles_id+"\
+              auth_rbac_roleprofile.child_id IN ("+ssd_roles_id+")\
              UNION \
              SELECT\
               rbacuserassignment_id,\
@@ -575,7 +571,7 @@ def _rbac_check_role_ssd_ua(node_id, ssd_roles_set, ssd_cardinality):
              FROM\
               auth_rbac_userassignment_roles\
              WHERE\
-              auth_rbac_userassignment_roles.rbacrole_id IN "+ssd_roles_id+"\
+              auth_rbac_userassignment_roles.rbacrole_id IN ("+ssd_roles_id+")\
             )\
            WHERE\
             rbacuserassignment_id\
@@ -769,13 +765,10 @@ def _rbac_ssd_enforcement(instance, action, pk_set, **kwargs):
         user_roles_id=list(user_roles.values_list('id', flat=True))
         user_childroles_id = list(RbacRoleProfile.objects.filter(parent__id__in=user_roles_id).values_list('child', flat=True))
         user_roles_id.extend(user_childroles_id)
-        sql_in = str(tuple(set(user_roles_id)))
-        #strip last comma from tuple
-        sql_in = sql_in.rstrip(",)") + ")"
-        #print sql_in
+        sql_in = ', '.join(itertools.imap(lambda x: str(x), set(user_roles_id)))
         
         sql = "SELECT\
-                SUM(CASE WHEN auth_rbac_ssdset_roles.rbacrole_id IN "+sql_in+" THEN 1 ELSE 0 END)\
+                SUM(CASE WHEN auth_rbac_ssdset_roles.rbacrole_id IN ("+sql_in+") THEN 1 ELSE 0 END)\
                 AS ssd_cardinality,\
                 auth_rbac_ssdset.cardinality\
                 AS max_ssd_cardinality\

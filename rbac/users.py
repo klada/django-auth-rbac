@@ -86,7 +86,7 @@ class AbstractRbacUser(models.Model):
 
 #Only define RbacUser when it is actually used. This avoids some ImportErrors
 # when using a custom user class.
-if settings.AUTH_USER_MODEL == "RbacUser":
+if settings.AUTH_USER_MODEL.lower() == "rbac.rbacuser":
     from django.contrib.auth.models import AbstractUser
 
     class RbacUser(AbstractUser):

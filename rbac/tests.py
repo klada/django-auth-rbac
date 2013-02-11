@@ -1,12 +1,11 @@
-from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.test.utils import override_settings
 from rbac import functions
 from rbac import models
+from rbac.users import RbacUser
 
-settings.RBAC_DEFAULT_ROLES = 'all'
-
+@override_settings(RBAC_DEFAULT_ROLES = 'all', USE_TZ=False)
 class RbacBackendTest(TestCase):
     fixtures = [ 'test-users.json', 'test-permissions.json',
                  'test-roles.json', 'test-ssdsets.json',
@@ -20,7 +19,7 @@ class RbacBackendTest(TestCase):
         models.RbacPermissionProfile.create()
         
         #get user with username=test
-        self.user = get_user_model().objects.get(pk=2)
+        self.user = RbacUser.objects.get(pk=2)
         
         self.role_a = models.RbacRole.objects.get(name="A")
         self.role_b = models.RbacRole.objects.get(name="B")

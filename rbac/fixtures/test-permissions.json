@@ -7,7 +7,7 @@
             ], 
             "create_date": "2012-11-23T12:35:10.265", 
             "description": "", 
-            "name": "test_role_a", 
+            "name": "test-role-a", 
             "touch_date": "2012-11-23T12:35:10.265"
         }, 
         "model": "rbac.rbacpermission", 
@@ -21,7 +21,7 @@
             ], 
             "create_date": "2012-11-23T12:35:14.708", 
             "description": "", 
-            "name": "test_role_b", 
+            "name": "test-role-b", 
             "touch_date": "2012-11-23T12:35:14.707"
         }, 
         "model": "rbac.rbacpermission", 
@@ -35,7 +35,7 @@
             ], 
             "create_date": "2012-11-23T12:35:21.832", 
             "description": "", 
-            "name": "test_role_c", 
+            "name": "test-role-c", 
             "touch_date": "2012-11-23T12:35:21.832"
         }, 
         "model": "rbac.rbacpermission", 
@@ -49,7 +49,7 @@
             ], 
             "create_date": "2012-11-23T12:35:32.373", 
             "description": "", 
-            "name": "test_role_d", 
+            "name": "test-role-d", 
             "touch_date": "2012-11-23T12:35:32.372"
         }, 
         "model": "rbac.rbacpermission", 
@@ -63,7 +63,7 @@
             ], 
             "create_date": "2012-11-23T12:36:02.343", 
             "description": "", 
-            "name": "test_role_ssd_one", 
+            "name": "test-role-ssd-one", 
             "touch_date": "2012-11-23T12:36:02.343"
         }, 
         "model": "rbac.rbacpermission", 
@@ -77,7 +77,7 @@
             ], 
             "create_date": "2012-11-23T12:35:41.550", 
             "description": "", 
-            "name": "test_role_ssd_two", 
+            "name": "test-role-ssd-two", 
             "touch_date": "2012-11-23T12:35:41.550"
         }, 
         "model": "rbac.rbacpermission", 
@@ -91,7 +91,7 @@
             ], 
             "create_date": "2012-11-23T12:35:56.611", 
             "description": "", 
-            "name": "test_role_ssd_three", 
+            "name": "test-role-ssd-three", 
             "touch_date": "2012-11-23T12:35:56.611"
         }, 
         "model": "rbac.rbacpermission", 
@@ -105,7 +105,7 @@
             ], 
             "create_date": "2012-11-23T12:35:48.546", 
             "description": "", 
-            "name": "test_role_ssd_four", 
+            "name": "test-role-ssd-four", 
             "touch_date": "2012-11-23T12:35:48.546"
         }, 
         "model": "rbac.rbacpermission", 

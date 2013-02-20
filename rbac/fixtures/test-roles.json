@@ -10,7 +10,7 @@
             "name": "A", 
             "permissions": [
                 [
-                    "test_role_a", 
+                    "test-role-a", 
                     "rbac", 
                     "rbacpermission"
                 ]
@@ -30,7 +30,7 @@
             "name": "B", 
             "permissions": [
                 [
-                    "test_role_b", 
+                    "test-role-b", 
                     "rbac", 
                     "rbacpermission"
                 ]
@@ -50,7 +50,7 @@
             "name": "C", 
             "permissions": [
                 [
-                    "test_role_c", 
+                    "test-role-c", 
                     "rbac", 
                     "rbacpermission"
                 ]
@@ -71,7 +71,7 @@
             "name": "D", 
             "permissions": [
                 [
-                    "test_role_d", 
+                    "test-role-d", 
                     "rbac", 
                     "rbacpermission"
                 ]
@@ -89,7 +89,7 @@
             "name": "SSD1", 
             "permissions": [
                 [
-                    "test_role_ssd_one", 
+                    "test-role-ssd-one", 
                     "rbac", 
                     "rbacpermission"
                 ]
@@ -107,7 +107,7 @@
             "name": "SSD2", 
             "permissions": [
                 [
-                    "test_role_ssd_two", 
+                    "test-role-ssd-two", 
                     "rbac", 
                     "rbacpermission"
                 ]
@@ -125,7 +125,7 @@
             "name": "SSD3", 
             "permissions": [
                 [
-                    "test_role_ssd_three", 
+                    "test-role-ssd-three", 
                     "rbac", 
                     "rbacpermission"
                 ]
@@ -143,7 +143,7 @@
             "name": "SSD4", 
             "permissions": [
                 [
-                    "test_role_ssd_four", 
+                    "test-role-ssd-four", 
                     "rbac", 
                     "rbacpermission"
                 ]

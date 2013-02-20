@@ -68,9 +68,9 @@ class RbacPermission(AbstractBaseModel):
     def clean(self):
         import re
 
-        pattern = '^[a-z][a-z\_]+[a-z]$'
+        pattern = '^[a-z][a-z\-]+[a-z]$'
         if re.match(pattern, self.name ) is None:
-            raise ValidationError("Only lowercase characters and \"_\" are allowed!")
+            raise ValidationError("Only lowercase characters and \"-\" are allowed!")
 
     def natural_key(self):
         return (self.name,) + self.content_type.natural_key()

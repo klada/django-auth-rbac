@@ -1,4 +1,5 @@
 import inspect
+import itertools
 import logging
 import re
 from django.contrib.auth.models import User
@@ -46,53 +47,69 @@ class RbacUserBackend(ModelBackend):
         if user_obj.is_anonymous():
             return False
         
-        if not isinstance(perm, models.RbacPermission):
-            if not obj:
-                #Also support admin-style permissions
-                # applabel.(add)|(change)|(delete)_modelname
-                perm_pattern = "^[A-z]+[\.]((add)|(change)|(delete))[_][A-z_]+$"
-                if re.match(perm_pattern, perm):
-                    splitperm = perm.split('.')
-                    app_label = splitperm[0]
-                    operation = splitperm[1].split('_')[0]
-                    model = ''.join(splitperm[1].split('_')[1:])
-                    try:
-                        perm = models.RbacPermission.objects.get(
-                                name = operation,
-                                content_type__app_label = app_label,
-                                content_type__model = model
-                               )
-                    except ObjectDoesNotExist:
-                        logger.info("has_perm(): Permission %s not found!" %perm)
-                        return False
-                else:
-                    #we cannot do anything useful with this permission, as
-                    # we are unable to identify the corresponding model
-                    logger.info("has_perm(): "
-                                "You cannot omit the obj parameter when not"
-                                " specifying a permission object!")   
-                    return False
+        if isinstance(perm, RbacPermission):
+            verbose_perm = "%s.%s_%s" %(perm.content_type.app_label, perm.name, perm.content_type.model)
+            if verbose_perm in self.get_all_permissions(user_obj):
+                return True
+            if hasattr(obj, "_has_perm") and not inspect.isclass(obj):
+                return obj._has_perm(perm)
             else:
+                return False
+        elif not obj:
+            return perm in self.get_all_permissions(user_obj)
+        else:
+            app_label = obj._meta.app_label
+            if inspect.isclass(obj):
+                model = obj.__name__.lower()
+            else:
+                model = obj.__class__.__name__.lower()
+            
+            perm_name = "%s.%s_%s" %(app_label, perm, model)
+            if perm_name in self.get_all_permissions(user_obj):
+                return True
+            
+            if hasattr(obj, "_has_perm") and not inspect.isclass(obj):
                 try:
-                    perm = models.RbacPermission.objects.get(
+                    perm = RbacPermission.objects.get(
                             name=perm,
-                            content_type=ContentType.objects.get_for_model(obj)
+                            content_type__app_label=app_label,
+                            content_type__model=model
                            )
                 except ObjectDoesNotExist:
-                    logger.info("has_perm(): Permission %s not found for the"
-                                " specified object!" %perm)
+                    logger.info("has_perm(): Permission %s not found!" %perm)
                     return False
+                
+                return obj.has_perm(perm)
+        return False
 
-        session = self._get_user_session(user_obj)
-
-        if session._has_perm(perm):
-            return True
-        #make sure we are calling _has_perm() on model instance
-        elif obj and hasattr(obj, "_has_perm") and not inspect.isclass(obj):
-            return obj._has_perm(user_obj, perm)
+    
+    def _get_all_object_permissions(self, user_obj, obj):
+        """
+        Please note that when passing in an actual class instance as I{obj}
+        you'll still only get the (global) Model permissions. This method will
+        not return any context-specific permissions through obj._has_perm()!
+        
+        @rtype: set
+        """
+        app_label = obj._meta.app_label
+        if not inspect.isclass(obj):
+            #We've got an instance here, but we don't deal with context-
+            # permissions in this method for performance reasons.
+            logger.info("_get_all_object_permissions(): Received a class instance, but only returning (global) Model permissions!")
+            model = obj.__class__.__name__
         else:
-            return False
-
+            #obj is a class
+            model = obj.__name__
+        model = model.lower()
+        
+        session = self._get_user_session(user_obj)
+        perms = RbacPermission.objects.filter(
+                 content_type__app_label=app_label,
+                 content_type__model=model,
+                 rbacpermissionprofile__role__in=session.active_roles.all()
+                ).values_list('name', flat=True)
+        return set(itertools.imap(lambda x: '%s.%s_%s' %(app_label, x, model), perms))
+ 
 
     def get_all_permissions(self, user_obj, obj=None):
         """
@@ -103,30 +120,30 @@ class RbacUserBackend(ModelBackend):
         you'll still only get the (global) Model permissions. This method will
         not return any context-specific permissions through obj._has_perm()!
         
-        @rtype: QuerySet
+        @rtype: set
         """
         if user_obj.is_anonymous():
-            return RbacPermission.objects.none()
-        
-        base_qs = models.RbacPermission.objects 
+            return set()
         
         if obj:
-            app_label = obj._meta.app_label
-            if not inspect.isclass(obj):
-                #We've got an instance here, but we don't deal with context-
-                # permissions in this method for performance reasons.
-                logger.info("get_all_permissions(): Received a class instance, but only returning (global) Model permissions!")
-                model = obj.__class__.__name__
-            else:
-                #obj is a class
-                model = obj.__name__
-            
-            base_qs = base_qs.filter(content_type__app_label=app_label, content_type__model=model)
+            return self._get_all_object_permissions(user_obj, obj)
         
-        session = self._get_user_session(user_obj)
-        return base_qs.filter(
-                 rbacpermissionprofile__role__in=session.active_roles.all()
-               )
+        if not hasattr(user_obj, '_rbacperm_cache'):
+            logger.debug('get_all_permissions(): Building permission cache for user %s' %user_obj.pk)
+            session = self._get_user_session(user_obj)
+            perms = RbacPermission.objects.filter(
+                     rbacpermissionprofile__role__in=session.active_roles.all()
+                    ).select_related(
+                     'content_type'
+                    ).values_list(
+                     'content_type__app_label',
+                     'name',
+                     'content_type__model',
+                    )
+            user_obj._rbacperm_cache = set(itertools.imap(lambda x: '%s.%s_%s' %(x[0], x[1], x[2]), perms))
+        else:
+            logger.debug('get_all_permissions(): Using permission cache for user %s' %user_obj.pk)
+        return user_obj._rbacperm_cache
         
 
 class RbacRemoteUserBackend(RbacUserBackend):

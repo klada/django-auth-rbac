@@ -337,7 +337,7 @@ class RbacSession(AbstractBaseModel):
         else:
             now = datetime.now()
         self.expire_date = now + timedelta(days=1)
-        #remove invalid RBAC sessons
+        #remove invalid RBAC sessions
         RbacSession.objects.filter(pk=self.pk).update(expire_date=self.expire_date)
         RbacSession.objects.filter(expire_date__lt=now).delete()
 
@@ -375,34 +375,12 @@ class RbacSession(AbstractBaseModel):
         Checks if the specified permission can be obtained within this session.
         
         @type permission: RbacPermission
+        @rtype: bool
         """
-        cache_timeout = 1800 #30 minute timeout
-        update_cache= False
-        if hasattr(settings, 'RBAC_CACHING') and \
-           settings.RBAC_CACHING:
-            cache_key = "_rbac_session_%s" %self.id
-            cache_value = cache.get(cache_key)
-            if permission.id in cache_value:
-                return cache_value[permission.id]
-            else:
-                update_cache = True
-
-        if RbacPermissionProfile.objects.filter(permission=permission, role__in=self.active_roles.all()).count() > 0:
-            if update_cache:
-                if cache_value:
-                    cache_value[permission.id] = True
-                else:
-                    cache_value = {permission.id: True}
-                cache.set(cache_value, cache_timeout)
-            return True
-        else:
-            if update_cache:
-                if cache_value:
-                    cache_value[permission.id] = False
-                else:
-                    cache_value = {permission.id: False}
-                cache.set(cache_value, cache_timeout)  
-            return False
+        return RbacPermissionProfile.objects.filter(
+                   permission=permission,
+                   role__in=self.active_roles.all()
+               ).count() > 0
     
 
     def save(self, *args, **kwargs):

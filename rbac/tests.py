@@ -1,11 +1,13 @@
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.utils import unittest
 from rbac import functions
 from rbac import models
-from rbac.users import RbacUser
 
 @override_settings(RBAC_DEFAULT_ROLES = 'all', USE_TZ=False)
+@unittest.skipIf(settings.RBAC_SKIP_TESTS, True)
 class RbacBackendTest(TestCase):
     fixtures = [ 'test-users.json', 'test-permissions.json',
                  'test-roles.json', 'test-ssdsets.json',
@@ -19,6 +21,7 @@ class RbacBackendTest(TestCase):
         models.RbacPermissionProfile.create()
         
         #get user with username=test
+        from rbac.users import RbacUser
         self.user = RbacUser.objects.get(pk=2)
         
         self.role_a = models.RbacRole.objects.get(name="A")
@@ -30,14 +33,14 @@ class RbacBackendTest(TestCase):
         self.role_ssdthree = models.RbacRole.objects.get(name="SSD3")
         self.role_ssdfour = models.RbacRole.objects.get(name="SSD4")
         
-        self.perm_test_role_a = models.RbacPermission.objects.get(name="test_role_a")
-        self.perm_test_role_b = models.RbacPermission.objects.get(name="test_role_b")
-        self.perm_test_role_c = models.RbacPermission.objects.get(name="test_role_c")
-        self.perm_test_role_d = models.RbacPermission.objects.get(name="test_role_d")
-        self.perm_test_role_ssd_one = models.RbacPermission.objects.get(name="test_role_ssd_one")
-        self.perm_test_role_ssd_two = models.RbacPermission.objects.get(name="test_role_ssd_two")
-        self.perm_test_role_ssd_three = models.RbacPermission.objects.get(name="test_role_ssd_three")
-        self.perm_test_role_ssd_four = models.RbacPermission.objects.get(name="test_role_ssd_four")
+        self.perm_test_role_a = models.RbacPermission.objects.get(name="test-role-a")
+        self.perm_test_role_b = models.RbacPermission.objects.get(name="test-role-b")
+        self.perm_test_role_c = models.RbacPermission.objects.get(name="test-role-c")
+        self.perm_test_role_d = models.RbacPermission.objects.get(name="test-role-d")
+        self.perm_test_role_ssd_one = models.RbacPermission.objects.get(name="test-role-ssd-one")
+        self.perm_test_role_ssd_two = models.RbacPermission.objects.get(name="test-role-ssd-two")
+        self.perm_test_role_ssd_three = models.RbacPermission.objects.get(name="test-role-ssd-three")
+        self.perm_test_role_ssd_four = models.RbacPermission.objects.get(name="test-role-ssd-four")
 
     
     def test_user_permission_basic(self):
@@ -55,7 +58,11 @@ class RbacBackendTest(TestCase):
         self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_three), True)
         self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_four), False)
 
-        #now deassign "Role A" and test again
+
+    def test_user_permission_role_deassign(self):
+        """
+        Deassign "Role A" and run permission test.
+        """
         self.assertEqual(functions.DeassignUser(self.user, self.role_a), True)
         
         self.assertEqual(self.user.has_perm(self.perm_test_role_a), False)
@@ -64,18 +71,6 @@ class RbacBackendTest(TestCase):
         self.assertEqual(self.user.has_perm(self.perm_test_role_d), True)
         self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_one), True)
         self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_two), False)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_three), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_four), False)
-
-        #assign "Role A" again
-        self.assertEqual(functions.AssignUser(self.user, self.role_a), True)
-        
-        self.assertEqual(self.user.has_perm(self.perm_test_role_a), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_b), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_c), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_d), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_one), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_two), True)
         self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_three), True)
         self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_four), False)
 
@@ -92,12 +87,17 @@ class RbacBackendTest(TestCase):
         self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_one), True)
         self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_two), False)
         
-        #add "Role B" again and test permissions
+    
+    def test_user_permission_after_hierarchy_change2(self):
+        """
+        Remove "Role B" from hierarchy and add it again.
+        """
+        self.role_a.children.remove(self.role_b)
         self.role_a.children.add(self.role_b)
         self.assertEqual(self.user.has_perm(self.perm_test_role_a), True)
         self.assertEqual(self.user.has_perm(self.perm_test_role_b), True)
         self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_one), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_two), True)
+        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_two), True)    
 
 
     def test_role_cycle_in_graph(self):

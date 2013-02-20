@@ -1,10 +1,8 @@
 import inspect
 import itertools
 import logging
-import re
 from django.contrib.auth.models import User
 from django.contrib.auth.backends import ModelBackend
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from rbac import _globals, models
 from rbac.models import RbacPermission, RbacPermissionProfile

@@ -50,7 +50,7 @@ class RbacUserBackend(ModelBackend):
             if verbose_perm in self.get_all_permissions(user_obj):
                 return True
             if hasattr(obj, "_has_perm") and not inspect.isclass(obj):
-                return obj._has_perm(perm)
+                return obj._has_perm(user_obj, perm)
             else:
                 return False
         elif not obj:
@@ -77,7 +77,7 @@ class RbacUserBackend(ModelBackend):
                     logger.info("has_perm(): Permission %s not found!" %perm)
                     return False
                 
-                return obj.has_perm(perm)
+                return obj._has_perm(user_obj, perm)
         return False
 
     

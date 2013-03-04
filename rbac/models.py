@@ -313,18 +313,17 @@ class RbacSession(AbstractBaseModel):
     This model represents the RBAC session for a user. It allows the user to
     set active roles for a session.
 
-    The default set of roles for a session can be controled through the setting
-    'RBAC_DEFAULT_ROLES'.
+    The default set of roles for a session can be controlled through the
+    setting 'RBAC_DEFAULT_ROLES'.
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True)
-    session_key = models.CharField(max_length=40, blank=False, db_index=True)
+    backend_session = models.BooleanField(default=True)
     active_roles = models.ManyToManyField(RbacRole)
     expire_date = models.DateTimeField(editable=False, auto_now=True)
 
 
     class Meta:
         db_table = 'auth_rbac_session'
-        unique_together = ('user', 'session_key')
         verbose_name = _("RBAC session")
         verbose_name_plural = _("RBAC sessions")
 
@@ -370,6 +369,11 @@ class RbacSession(AbstractBaseModel):
                    permission=permission,
                    role__in=self.active_roles.all()
                ).count() > 0
+    
+    
+    def clean(self):
+        if RbacSession.objects.filter(user=self.user, backend_session=True).exclude(id=self.pk).count() > 0:
+            raise ValidationError('Only one backend session is allowed per user!')
     
 
     def save(self, *args, **kwargs):
@@ -764,7 +768,7 @@ def _rbac_userassignment_roles_changed(sender, instance, action, reverse, model,
     to add/remove them from the user's sessions.
     """
     if action == 'post_add':
-        RbacSession.objects.filter(user=instance.user, session_key="backend").delete()
+        RbacSession.objects.filter(user=instance.user, backend_session=True).delete()
     
     if action == 'post_remove':
         RbacSession.objects.filter(user=instance.user, active_roles__in=pk_set).delete()

@@ -27,7 +27,7 @@ class RbacUserBackend(ModelBackend):
             #the session in _globals belongs to request.user
             return _globals._rbac_session
         else:
-            rbac_session, created = models.RbacSession.objects.get_or_create(user=user_obj, session_key="backend") #@UnusedVariable
+            rbac_session, created = models.RbacSession.objects.get_or_create(user=user_obj, backend_session=True) #@UnusedVariable
             return rbac_session
     
     

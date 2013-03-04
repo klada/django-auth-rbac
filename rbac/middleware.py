@@ -16,9 +16,7 @@ class RbacSessionMiddleware(object):
             return
         
         try:
-            if not request.session.session_key:
-                request.session.create()
-            my_session_key = request.session.session_key
+            rbac_session_id = request.session.get('_rbac_session_id', 0)
         except AttributeError:
             raise ImproperlyConfigured(
                 "The RBAC session middleware requires the"
@@ -27,8 +25,12 @@ class RbacSessionMiddleware(object):
                 " 'django.contrib.sessions.middleware.SessionMiddleware'"
                 " before the RbacSessionMiddleware class.")
 
-        _globals._rbac_session, created = RbacSession.objects.get_or_create(user=request.user, session_key=my_session_key) #@UnusedVariable
-
+        if rbac_session_id == 0:
+            _globals._rbac_session = RbacSession.objects.create(user=request.user, backend_session=False)
+            request.session['_rbac_session_id'] = _globals._rbac_session.id
+        else:
+            _globals._rbac_session = RbacSession.objects.get(id=rbac_session_id)
+            
 
     def process_response(self, request, response):
         #clean up _globals

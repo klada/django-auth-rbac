@@ -390,8 +390,6 @@ class RbacSession(AbstractBaseModel):
 
         if new_session:
             self._activate_default_roles()
-        else:
-            self._clear_cache()
 
 
 class RbacSsdSet(AbstractBaseModel):

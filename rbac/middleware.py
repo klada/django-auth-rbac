@@ -1,4 +1,4 @@
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from rbac import _globals
 from rbac.models import RbacSession
 
@@ -29,8 +29,12 @@ class RbacSessionMiddleware(object):
             _globals._rbac_session = RbacSession.objects.create(user=request.user, backend_session=False)
             request.session['_rbac_session_id'] = _globals._rbac_session.id
         else:
-            _globals._rbac_session = RbacSession.objects.get(id=rbac_session_id)
-            
+            try:
+                _globals._rbac_session = RbacSession.objects.get(id=rbac_session_id, user=request.user)
+            except ObjectDoesNotExist:
+                _globals._rbac_session = RbacSession.objects.create(user=request.user, backend_session=False)
+                request.session['_rbac_session_id'] = _globals._rbac_session.id            
+
 
     def process_response(self, request, response):
         #clean up _globals

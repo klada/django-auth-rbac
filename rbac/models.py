@@ -328,18 +328,6 @@ class RbacSession(AbstractBaseModel):
         verbose_name_plural = _("RBAC sessions")
 
 
-    def __init__(self, *args, **kwargs):
-        super(RbacSession, self).__init__(*args, **kwargs)
-        if settings.USE_TZ:
-            now = datetime.utcnow().replace(tzinfo=utc)
-        else:
-            now = datetime.now()
-        self.expire_date = now + timedelta(days=1)
-        #remove invalid RBAC sessions
-        RbacSession.objects.filter(pk=self.pk).update(expire_date=self.expire_date)
-        RbacSession.objects.filter(expire_date__lt=now).delete()
-
-
     def _activate_default_roles(self):
         if not self.user:
             return
@@ -374,6 +362,18 @@ class RbacSession(AbstractBaseModel):
     def clean(self):
         if RbacSession.objects.filter(user=self.user, backend_session=True).exclude(id=self.pk).count() > 0:
             raise ValidationError('Only one backend session is allowed per user!')
+
+
+    @staticmethod
+    def clear_expired():
+        """
+        Removes expired RBAC sessions from the database.
+        """
+        if settings.USE_TZ:
+            now = datetime.utcnow().replace(tzinfo=utc)
+        else:
+            now = datetime.now()
+        RbacSession.objects.filter(expire_date__lt=now).delete()
     
 
     def save(self, *args, **kwargs):

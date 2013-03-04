@@ -9,7 +9,6 @@ from django.dispatch import receiver
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.cache import cache
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 
@@ -360,16 +359,6 @@ class RbacSession(AbstractBaseModel):
         self.active_roles=self.user.get_all_roles()
 
 
-    def _clear_cache(self):
-        """
-        Clears the permission cache of this session.
-        This method should be called when adding/removing roles to/from this
-        session.
-        """
-        cache_key = "_rbac_session_%s" %self.id
-        cache.delete(cache_key)
-
-
     def _has_perm(self, permission):
         """
         Checks if the specified permission can be obtained within this session.
@@ -611,7 +600,6 @@ def _rbac_session_delete(sender, instance, **kwargs):
     if hasattr(_globals, '_rbac_session') and \
        _globals._rbac_session and \
        _globals._rbac_session.id == instance.id:
-        
         del(_globals._rbac_session)
 
 
@@ -627,8 +615,6 @@ def _rbac_session_validate_roles(sender, instance, action, reverse, model, pk_se
         if instance.user.get_all_roles().filter(id__in=pk_set).count() != len(pk_set):
             raise ValidationError(
                "At least one role is not assigned to the session user!")
-    if action == 'post_add' or action == 'post_remove':
-        instance._clear_cache()
 
 
 @receiver(models.signals.m2m_changed, sender=RbacRole.children.through)
@@ -794,3 +780,4 @@ def _rbac_userassignment_delete(sender, instance, **kwargs):
     RbacUserAssignment.
     """
     RbacSession.objects.filter(user=instance.user).delete()
+

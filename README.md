@@ -61,12 +61,6 @@ You can also protect some of your model methods from being called by a user whic
 
 Limitations
 -----------
-* Per-object permissions are not directly supported (only per-model permissions). However, it is possible to add a *_has_perm()* method to your models which can be used for defining object permissions.
+* Per-object permissions are not directly supported (only per-model permissions). However, it is possible to add a *_has_perm()* method to your models which can be used for checking context-sensitive permissions.
 
 
-FAQ
----
-
-* **Q:** Why are you messing with thread-local data?
-  **A:** The user's RBAC session is stored within thread-local data. This is mainly used for the method decorator `rbac_model_permission_required`.
- 

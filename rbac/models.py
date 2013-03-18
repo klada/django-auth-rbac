@@ -593,18 +593,6 @@ def _rbac_role_children_changed(sender, instance, action, reverse, model, pk_set
         RbacPermissionProfile.create()
 
 
-@receiver(models.signals.post_delete, sender=RbacSession)
-def _rbac_session_delete(sender, instance, **kwargs):
-    """
-    Also removes a deleted RbacSession from _globals.
-    """
-    from rbac import _globals
-    if hasattr(_globals, '_rbac_session') and \
-       _globals._rbac_session and \
-       _globals._rbac_session.id == instance.id:
-        del(_globals._rbac_session)
-
-
 @receiver(models.signals.m2m_changed, sender=RbacSession.active_roles.through)
 def _rbac_session_validate_roles(sender, instance, action, reverse, model, pk_set, **kwargs):
     """

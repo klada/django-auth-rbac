@@ -4,7 +4,7 @@ import logging
 from django.contrib.auth.models import User
 from django.contrib.auth.backends import ModelBackend
 from django.core.exceptions import ObjectDoesNotExist
-from rbac import _globals, models
+from rbac import models
 from rbac.models import RbacPermission, RbacPermissionProfile
 
 logger = logging.getLogger(__name__)
@@ -21,13 +21,16 @@ class RbacUserBackend(ModelBackend):
 
         @rtype: rbac.models.RbacSession
         """
-        if hasattr(_globals, '_rbac_session') and \
-           isinstance(_globals._rbac_session, models.RbacSession) and \
-           _globals._rbac_session.user == user_obj:
-            #the session in _globals belongs to request.user
-            return _globals._rbac_session
+        if hasattr(user_obj, '_rbac_session') and \
+           isinstance(user_obj._rbac_session, models.RbacSession) and \
+           user_obj._rbac_session.user == user_obj:
+            #the session belongs to request.user
+            return user_obj._rbac_session
         else:
-            rbac_session, created = models.RbacSession.objects.get_or_create(user=user_obj, backend_session=True) #@UnusedVariable
+            rbac_session, created = models.RbacSession.objects.get_or_create(user=user_obj, backend_session=True)
+            if created:
+                logger.debug("Created RBAC backend session for user %s." %user_obj.id)
+            logger.info("Using RBAC backend session for user %s." %user_obj.id)
             return rbac_session
     
     

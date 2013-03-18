@@ -1,5 +1,4 @@
 from django.contrib.auth.decorators import user_passes_test
-from rbac import _globals
 from rbac.exceptions import RbacPermissionDenied, RbacRuntimeError
 from rbac.models import RbacSession, RbacPermission
 
@@ -30,6 +29,7 @@ def rbac_model_permission_required(operation):
     admin shell) you can pass the parameter "disable_rbac=True" to the medhod.
 
 
+    @TODO: This decorator is broken.
     @raise  RbacPermissionDenied: When the user was not authorized to perform
                                   the operation.
     @raise RbacRuntimeError: When this decorator was used on non-Django models.

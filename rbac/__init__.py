@@ -1,5 +1,4 @@
 import sys
-from threading import local
 from django.conf import settings
 
 # Fall back to 'rbac.RbacUser' if
@@ -21,4 +20,3 @@ if 'test' in sys.argv:
 if settings.AUTH_USER_MODEL.lower() == 'rbac.rbacuser':
     from rbac.users import RbacUser
 
-_globals=local()

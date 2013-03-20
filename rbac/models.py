@@ -497,8 +497,8 @@ def _rbac_check_ssd_userassignment(ssd_roles_set, ssd_cardinality):
 
 def _rbac_check_role_ssd_ua(node_id, ssd_roles_set, ssd_cardinality):
     """
-    This function is called when adding new descendants to the I{role node_id}.
-    It checks if any of the current RbacUserAssignment instamces would violate
+    This function is called when adding new descendants to the role I{node_id}.
+    It checks if any of the current RbacUserAssignment instances would violate
     the SSD set with ssd_roles_set and ssd_cardinality.
         
     In order to keep the network and database load at a minimum we are using

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from logging import getLogger
 import itertools
 from Queue import Queue
@@ -360,7 +360,7 @@ class RbacSession(AbstractBaseModel):
     
     
     def clean(self):
-        if RbacSession.objects.filter(user=self.user, backend_session=True).exclude(id=self.pk).count() > 0:
+        if self.backend_session and RbacSession.objects.filter(user=self.user, backend_session=True).exclude(id=self.pk).count() > 0:
             raise ValidationError('Only one backend session is allowed per user!')
 
 

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 from rbac import models
-from rbac.forms import RbacRoleForm, RbacUserAssignmentForm
+from rbac.forms import RbacRoleForm
 
 class TopLevelRoleFilter(admin.SimpleListFilter):
     """
@@ -35,7 +35,8 @@ class RbacSsdAdmin(admin.ModelAdmin):
 
 
 class UserAssignmentAdmin(admin.ModelAdmin):
-    form = RbacUserAssignmentForm
+    raw_id_fields = ('user',)
+    search_fields = ['user__username', 'roles__name']
     filter_horizontal = ('roles', )
 
 

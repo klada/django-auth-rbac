@@ -60,23 +60,3 @@ class RbacRoleForm(forms.ModelForm):
             if child_role in self.instance.get_all_parents():
                 raise forms.ValidationError("Adding this child role would result in a cycle in the role graph!")
         return self.cleaned_data['children']
-
-
-class RbacUserAssignmentForm(forms.ModelForm):
-    """
-    This form is used in the Django admin and makes sure that the user field
-    only contains valid choices.
-    """
-    def __init__(self, *args, **kwargs):
-        if 'instance' in kwargs:
-            user_choices = get_user_model().objects.filter(
-                                        Q(rbacuserassignment=None) |
-                                        Q(pk=kwargs['instance'].user.id))
-        else:
-            user_choices = get_user_model().objects.filter(rbacuserassignment=None)
-        super(RbacUserAssignmentForm, self).__init__(*args, **kwargs)
-        self.fields['user'].queryset = user_choices
-        
-    
-    class Meta:
-        model = RbacUserAssignment

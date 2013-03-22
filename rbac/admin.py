@@ -1,25 +1,32 @@
 from django.contrib import admin
+from django.utils.translation import ugettext_lazy as _
 from rbac import models
 from rbac.forms import RbacRoleForm, RbacUserAssignmentForm
 
-"""
-class TestAdmin(admin.StackedInline):
-    model = models.RbacRoleChildren
-    fk_name = 'parent'
+class TopLevelRoleFilter(admin.SimpleListFilter):
+    """
+    Allows to select only top-level roles or only roles with at least one
+    parent.
+    """
+    title = _('top-level roles')
+    parameter_name = 'toplevelroles'
     
-class RoleAdmin(admin.ModelAdmin):
-    #fieldsets = (
-    #    (None, {'fields': ('name', 'description')}),
-    #    (_('Permissions'), {'fields': ('permissions')}),
-    #)
-    fields = ['name', 'description', 'permissions', ]
-    filter_horizontal = ('permissions', )
-    inlines = [
-        TestAdmin,
-    ]
-""" 
+    def lookups(self, request, model_admin):
+        return (
+            ('1', _('Yes')),
+            ('0', _('No')),
+        )
+        
+    def queryset(self, request, queryset):
+        if self.value() == '1':
+            return queryset.filter(parents_all=None)
+        elif self.value() == '0':
+            return queryset.exclude(parents_all=None)
+
 class RoleAdmin(admin.ModelAdmin):
     form = RbacRoleForm
+    search_fields = ['name']
+    list_filter = (TopLevelRoleFilter, )
     filter_horizontal = ('permissions', 'children' )
     
 

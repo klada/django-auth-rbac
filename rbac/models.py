@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from logging import getLogger
 import itertools
 from Queue import Queue
@@ -319,13 +319,20 @@ class RbacSession(AbstractBaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True)
     backend_session = models.BooleanField(default=True)
     active_roles = models.ManyToManyField(RbacRole)
-    expire_date = models.DateTimeField(editable=False, auto_now=True)
+    expire_date = models.DateTimeField(editable=False)
 
 
     class Meta:
         db_table = 'auth_rbac_session'
         verbose_name = _("RBAC session")
         verbose_name_plural = _("RBAC sessions")
+
+
+    def __init__(self, *args, **kwargs):
+        super(RbacSession, self).__init__(*args, **kwargs)
+        
+        if self.expire_date is None:
+            self.expire_date = datetime.now() + timedelta(seconds=settings.SESSION_COOKIE_AGE)
 
 
     def _activate_default_roles(self):

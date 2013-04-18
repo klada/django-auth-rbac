@@ -13,7 +13,6 @@ class RbacUserBackend(ModelBackend):
     """
     Limitations:
         - Does not support group permissions
-        - Does not support app-label permissions
     """
     def _get_user_session(self, user_obj):
         """
@@ -34,14 +33,24 @@ class RbacUserBackend(ModelBackend):
             return rbac_session
     
     
-    def has_module_perms(self, user_obj, abb_label):
+    def has_module_perms(self, user_obj, app_label):
         if user_obj.is_anonymous():
             return False
-        session = self._get_user_session(user_obj)
-        if RbacPermissionProfile.objects.filter(role__in=session.active_roles.all(), permission__content_type__app_label=abb_label).count() > 0:
-            return True
+        
+        if not hasattr(user_obj, '_rbac_module_permission_cache'):
+            logger.debug('has_module_perms(): Building app-label permission cache for user %s' %user_obj.pk)
+            session = self._get_user_session(user_obj)
+            app_labels = RbacPermissionProfile.objects.filter(
+                             role__in=session.active_roles.all()
+                         ).values_list(
+                             'permission__content_type__app_label',
+                             flat=True
+                         ).distinct()
+            user_obj._rbac_module_permission_cache = set(app_labels)
         else:
-            return False
+            logger.debug('has_module_perms(): Using app-label permission cache for user %s' %user_obj.pk)
+        
+        return app_label in user_obj._rbac_module_permission_cache
 
 
     def has_perm(self, user_obj, perm, obj=None):

@@ -187,30 +187,18 @@ class RbacRoleProfile(AbstractBaseModel):
         else:
             currentTime = datetime.now()
 
-
-        #We want to read the entire hierarchy with one sql query. Since Django
-        # does not support this we need to run a custom query.
-        hierarchy_db_table = RbacRole.children.through._meta.db_table
-        sql = "SELECT \
-               from_rbacrole_id,\
-               to_rbacrole_id \
-              FROM\
-               "+hierarchy_db_table
-
         adj_list = {}    
         bulk_list = []
+        pairs = set()
 
         with transaction.commit_manually():
-            cursor = connection.cursor()
-            cursor.execute(sql)
-            
-            #create a adjacency list of the role hierarchy
-            for role_pair in cursor.fetchall():
-                if role_pair[0] in adj_list:
-                    adj_list[role_pair[0]].append(role_pair[1])
+            #create an adjacency list of the role hierarchy
+            for parent, child in RbacRole.objects.exclude(children=None).values_list('id', 'children'):                
+                if parent in adj_list:
+                    adj_list[parent].append(child)
                 else:
-                    adj_list[role_pair[0]]=[role_pair[1],]
-            
+                    adj_list[parent]=[child,]
+                        
             #Search for all child nodes which can be reached from parent through
             # a breadth-first-search.
             #Instead of coloring we're using a dict which keeps track of the
@@ -225,6 +213,12 @@ class RbacRoleProfile(AbstractBaseModel):
                                    
                 while not child_queue.empty():
                     node = child_queue.get_nowait()
+                    pair = (parent, node)
+                    if pair not in pairs:
+                        pairs.add(pair)
+                    else:
+                        continue
+                        
                     bulk_list.append(
                        RbacRoleProfile(
                                        parent_id=parent,

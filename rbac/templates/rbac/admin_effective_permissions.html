@@ -1,0 +1,152 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Effective permissions of RBAC role{% endblock %}
+{% block extrastyle %}
+<script type="text/javascript" src="{{STATIC_URL}}admin/js/jquery.js"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label='rbac' %}">RBAC</a>
+&rsaquo; <a href="{% url 'admin:rbac_rbacrole_changelist' %}">RBAC Roles</a>
+&rsaquo; <a href="{% url 'admin:rbac_rbacrole_change' role.id %}">Role &quot;{{role.name}}&quot;</a>
+&rsaquo; {% trans "Effective permissions" %}
+</div>
+{% endblock %}
+
+{% block extrahead %}
+ {{ block.super }}
+ <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}admin/css/forms.css" />
+{% endblock %}
+
+{% block content %}
+<h1>{% blocktrans with role_name=role.name %}Effective permissions of role &quot;{{role_name}}&quot;{% endblocktrans %}</h1>
+<form action="." method="post" id="id_effectivepermissionfilterform" style="visibility: hidden;">
+  {% csrf_token %}
+  <fieldset class="module aligned">
+    <h2>Filter</h2>
+    <div class="form-row field-name">
+    	<div>
+    		<label for="id_app_label">App-Label:</label>
+    		<select id="id_app_label" name="app_label"></select>
+    	</div>
+    </div>
+    <div class="form-row field-name">
+    	<div>
+    		<label for="id_model">Model:</label>
+    		<select id="id_model" name="model"></select>
+    	</div>
+    </div>
+  </fieldset>
+</form>
+
+<table id="id_permission_table">
+ <tr>
+  <th>App</th>
+  <th>Model</th>
+  <th>Operation</th>
+ </tr>
+</table>
+
+<script>
+	permissions = {{permissions}};
+
+	function getEmptyOption() {
+		return $("<option/>").val('').text('---------');
+	}
+ 
+	function setAppLabelChoices() {
+    	$('select#id_app_label').empty();
+    	getEmptyOption().appendTo("select#id_app_label");
+    	for (var app_label in permissions) {
+			$("<option/>").val(app_label).text(app_label).appendTo('select#id_app_label');
+		}
+	}
+ 
+	function setModelChoices() {
+		var app_label = $("select#id_app_label").val();
+		$("select#id_model").empty();
+		getEmptyOption().appendTo("select#id_model");
+		
+		if (permissions[app_label]) {
+			for (var model in permissions[app_label]) {
+				$("<option/>").val(model).text(model).appendTo("select#id_model");
+			}
+		} else {
+			for (var app_label in permissions) {
+				for (var model in permissions[app_label]) {
+					$("<option/>").val(model).text(model).appendTo("select#id_model");
+				}
+			}
+		}
+	}
+
+	/**
+	 * Add a record for all permissions of the specified app_label, model
+	 * combinations to the permission table. 
+	 */
+	function addPermissionsToTable(app_label, model) {
+		for (var i=0;i<permissions[app_label][model].length;++i) {
+			entry = "<tr class=\"permission_record\"><td>"+app_label+"</td><td>"+model+"</td><td>"+permissions[app_label][model][i]+"</td></tr>";
+			$("table#id_permission_table").append(entry);
+		}
+	}
+
+	/**
+	 * Rebuilds the HTML permission table based on the values specified by the
+	 * filter form.
+	 */
+	function buildTable() {
+		$("tr.permission_record").remove();
+		var app_label = $("select#id_app_label").val();
+		var model = $("select#id_model").val();
+		var permission;
+		var entry;
+		
+		if (app_label == '') {
+			if (model == '') {
+				for (app_label in permissions) {
+					for (model in permissions[app_label]) {
+						addPermissionsToTable(app_label, model);
+					}
+				}
+			} else {
+				for (app_label in permissions) {
+					for (var i in permissions[app_label]) {
+						if (i==model) {
+							addPermissionsToTable(app_label, model);
+						}
+					}
+				}
+			}
+		} else {
+			if (permissions[app_label][model]) {
+				addPermissionsToTable(app_label, model);
+			} else {
+				for (model in permissions[app_label]) {
+					addPermissionsToTable(app_label, model);
+				}
+			}
+		}
+	}
+ 
+ $(document).ready(function() {
+     $('select#id_app_label').bind('change', function(){
+            setModelChoices();
+            buildTable();
+      });
+     $('select#id_model').bind('change', function(){
+            buildTable();
+      });
+     setAppLabelChoices();
+     setModelChoices();
+     buildTable();
+     $("form#id_effectivepermissionfilterform").css("visibility", "visible");
+
+ });
+</script>
+
+
+{% endblock content %}

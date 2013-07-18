@@ -9,8 +9,10 @@ from django.dispatch import receiver
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.utils.html import format_html
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext
 
 logger = getLogger("rbac.models")
 
@@ -99,6 +101,15 @@ class RbacRole(AbstractBaseModel):
         verbose_name = _("RBAC role")
         verbose_name_plural = _("RBAC roles")
         ordering = [ 'name' ]
+
+    def _admin_effective_permissions(self):
+        return format_html(
+            '<a href="./{0}/effective_permissions/">{1}</a>',
+            self.pk,
+            ugettext('Display effective permissions')
+        )
+    _admin_effective_permissions.allow_tags = True
+    _admin_effective_permissions.short_description = _('Effective permissions')
 
     def _get_all_parents_uncached(self):
         """

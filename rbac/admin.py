@@ -1,7 +1,10 @@
+from django.conf.urls import patterns, url
 from django.contrib import admin
+from django.shortcuts import get_object_or_404
+from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
 from rbac import models
-from rbac.forms import RbacRoleForm
+from rbac.forms import RbacRoleForm, EffectivePermissionFilterForm
 
 class TopLevelRoleFilter(admin.SimpleListFilter):
     """
@@ -27,7 +30,55 @@ class RoleAdmin(admin.ModelAdmin):
     form = RbacRoleForm
     search_fields = ['name']
     list_filter = (TopLevelRoleFilter, )
+    list_display = ('name', '_admin_effective_permissions')
     filter_horizontal = ('permissions', 'children' )
+    change_form_template = 'rbac/change_form.html'
+        
+    def get_urls(self):
+        urls = super(RoleAdmin, self).get_urls()
+        my_urls = patterns('',
+            url(r'^(\d+)/effective_permissions/$', self.view_effective_permissions)
+        )
+        return my_urls + urls
+    
+
+    def view_effective_permissions(self, request, role_id):
+        """
+        View which displays the effective permissions of a role
+        with support for filtering by app_label and model.
+        """
+        from django.utils.safestring import mark_safe
+        from rbac.models import RbacPermissionProfile
+        import json
+        role = get_object_or_404(models.RbacRole, pk=role_id)
+        
+        permissions = {}
+        for i in RbacPermissionProfile.objects.filter(
+             role=role
+         ).values_list(
+             'permission__content_type__app_label',
+             'permission__content_type__model',
+             'permission__name'
+         ):
+            app_label = i[0]
+            model = i[1]
+            permission = i[2]
+            if app_label not in permissions:
+                permissions[app_label] = {}
+            if model not in permissions[app_label]:
+                permissions[app_label][model] = []
+            permissions[app_label][model].append(permission)
+        
+        permissions = mark_safe(json.dumps(permissions, sort_keys=True))
+            
+        return TemplateResponse(
+            request, 
+            'rbac/admin_effective_permissions.html',
+            {
+                'permissions': permissions,
+                 'role': role
+            }
+        )
     
 
 class RbacSsdAdmin(admin.ModelAdmin):

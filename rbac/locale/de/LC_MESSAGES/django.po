@@ -8,63 +8,105 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-10-14 22:22+0200\n"
+"POT-Creation-Date: 2013-07-18 13:29+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: models.py:41
+#: admin.py:14
+msgid "top-level roles"
+msgstr ""
+
+#: admin.py:19
+msgid "Yes"
+msgstr "Ja"
+
+#: admin.py:20
+msgid "No"
+msgstr "Nein"
+
+#: models.py:46
+msgid "Name"
+msgstr "Name"
+
+#: models.py:47
+msgid "Description"
+msgstr "Beschreibung"
+
+#: models.py:48
+msgid "Model"
+msgstr "Model"
+
+#: models.py:62
 msgid "RBAC permission"
 msgstr "RBAC Berechtigung"
 
-#: models.py:42
+#: models.py:63
 msgid "RBAC permissions"
 msgstr "RBAC Berechtigungen"
 
-#: models.py:76
+#: models.py:101
 msgid "RBAC role"
 msgstr "RBAC Rolle"
 
-#: models.py:77
+#: models.py:102
 msgid "RBAC roles"
 msgstr "RBAC Rollen"
 
-#: models.py:239
+#: models.py:109
+msgid "Display effective permissions"
+msgstr "Effektive Berechtigungen anzeigen"
+
+#: models.py:112 templates/rbac/admin_effective_permissions.html:15
+#: templates/rbac/change_form.html:5
+msgid "Effective permissions"
+msgstr "Effektive Berechtigungen"
+
+#: models.py:269
 msgid "RBAC role profile"
 msgstr "RBAC Rollenprofil"
 
-#: models.py:240
+#: models.py:270
 msgid "RBAC role profiles"
 msgstr "RBAC Rollenprofile"
 
-#: models.py:303
+#: models.py:332
 msgid "RBAC session"
 msgstr "RBAC Sitzung"
 
-#: models.py:304
+#: models.py:333
 msgid "RBAC sessions"
 msgstr "RBAC Sitzungen"
 
-#: models.py:406
+#: models.py:415
 msgid "RBAC Static Separation of Duty Constraint"
 msgstr ""
 
-#: models.py:407
+#: models.py:416
 msgid "RBAC Static Separation of Duty Constraints"
 msgstr ""
 
-#: models.py:428
+#: models.py:441
 msgid "RBAC user assignment"
 msgstr "RBAC Benutzerzuweisung"
 
-#: models.py:429
+#: models.py:442
 msgid "RBAC user assignments"
 msgstr "RBAC Benutzerzuweisungen"
+
+#: templates/rbac/admin_effective_permissions.html:11
+msgid "Home"
+msgstr ""
+
+#: templates/rbac/admin_effective_permissions.html:25
+#, python-format
+msgid "Effective permissions of role &quot;%(role_name)s&quot;"
+msgstr "Effektive Berechtigungen der Rolle &quot;%(role_name)s&quot;"
 
 #: templates/rbac/set_active_roles.html:13
 #: templates/rbac/set_active_roles.html:16
@@ -79,6 +121,6 @@ msgstr "Bitte wählen Sie eine oder mehrere Rollen für diese Sitzung:"
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: templates/rbac/set_active_roles.html:44
+#: templates/rbac/set_active_roles.html:43
 msgid "Apply"
 msgstr "Anwenden"

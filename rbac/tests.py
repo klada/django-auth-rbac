@@ -1,18 +1,51 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.management import call_command
+from django.contrib.auth import get_user_model
+from django.db.models import Model
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils import unittest
 from rbac import functions
 from rbac import models
 
+class TestModel(Model):
+    """
+    This is a dummy model only used for testing.
+    """
+    class Meta:
+        app_label = "rbac"
+        permissions = (
+            ('opa', 'Operation allowed by role A'),
+            ('opb', 'Operation allowed by role B'),
+            ('opc', 'Operation allowed by role C'),
+            ('opd', 'Operation allowed by role D'),
+            ('opssd1', 'Operation allowed by role SSD1'),
+            ('opssd2', 'Operation allowed by role SSD2'),
+            ('opssd3', 'Operation allowed by role SSD3'),
+            ('opssd4', 'Operation allowed by role SSD4'),
+        )
+
+
+def skipWithoutRbacUser(func):
+    """
+    TestCase decorator which skips the test if an RBAC user is required
+    but could not be loaded.
+    """
+    def _decorated(*args, **kwargs):
+        self = args[0]
+        if not hasattr(self, 'user') or self.user is None:
+            return self.skipTest('No RBAC user could be loaded')
+        else:       
+            return func(*args, **kwargs)
+    return _decorated
+
+
 @override_settings(RBAC_DEFAULT_ROLES = 'all', USE_TZ=False)
-@unittest.skipIf(settings.RBAC_SKIP_TESTS, True)
 class RbacBackendTest(TestCase):
-    fixtures = [ 'test-users.json', 'test-permissions.json',
-                 'test-roles.json', 'test-ssdsets.json',
-                 'test-userassignments.json' ]
-    
+    fixtures = [
+        'test-roles.json',
+        'test-ssdsets.json',
+    ]   
     
     def setUp(self):
         #after loading fixtures we need to populate the role and permission
@@ -20,61 +53,71 @@ class RbacBackendTest(TestCase):
         models.RbacRoleProfile.create()
         models.RbacPermissionProfile.create()
         
-        #get user with username=test
-        from rbac.users import RbacUser
-        self.user = RbacUser.objects.get(pk=2)
+        self.role_a = models.RbacRole.objects.get(name="Role A")
+        self.role_b = models.RbacRole.objects.get(name="Role B")
+        self.role_c = models.RbacRole.objects.get(name="Role C")
+        self.role_d = models.RbacRole.objects.get(name="Role D")
+        self.role_ssdone = models.RbacRole.objects.get(name="Role SSD 1")
+        self.role_ssdtwo = models.RbacRole.objects.get(name="Role SSD 2")
+        self.role_ssdthree = models.RbacRole.objects.get(name="Role SSD 3")
+        self.role_ssdfour = models.RbacRole.objects.get(name="Role SSD 4")
+
+        if settings.AUTH_USER_MODEL.lower() == 'rbac.rbacuser':
+            # We're using the RBAC user model and do not need any fixtures.
+            self.user = get_user_model().objects.create(id=1)
+        else:
+            # We're using a custom user model and need to rely on external fixtures
+            call_command('loaddata', 'rbac_test_user.json', verbosity=0)
+            try:
+                self.user = get_user_model().objects.get(id=1)
+            except:
+                self.user = None
         
-        self.role_a = models.RbacRole.objects.get(name="A")
-        self.role_b = models.RbacRole.objects.get(name="B")
-        self.role_c = models.RbacRole.objects.get(name="C")
-        self.role_d = models.RbacRole.objects.get(name="D")
-        self.role_ssdone = models.RbacRole.objects.get(name="SSD1")
-        self.role_ssdtwo = models.RbacRole.objects.get(name="SSD2")
-        self.role_ssdthree = models.RbacRole.objects.get(name="SSD3")
-        self.role_ssdfour = models.RbacRole.objects.get(name="SSD4")
-        
-        self.perm_test_role_a = models.RbacPermission.objects.get(name="test-role-a")
-        self.perm_test_role_b = models.RbacPermission.objects.get(name="test-role-b")
-        self.perm_test_role_c = models.RbacPermission.objects.get(name="test-role-c")
-        self.perm_test_role_d = models.RbacPermission.objects.get(name="test-role-d")
-        self.perm_test_role_ssd_one = models.RbacPermission.objects.get(name="test-role-ssd-one")
-        self.perm_test_role_ssd_two = models.RbacPermission.objects.get(name="test-role-ssd-two")
-        self.perm_test_role_ssd_three = models.RbacPermission.objects.get(name="test-role-ssd-three")
-        self.perm_test_role_ssd_four = models.RbacPermission.objects.get(name="test-role-ssd-four")
+        # Create RbacUserAssignment
+        if self.user != None:
+            functions.AssignUser(self.user, self.role_a)
+            functions.AssignUser(self.user, self.role_c)
+
+
+    def tearDown(self):
+        self.user = None
 
     
+    @skipWithoutRbacUser
     def test_user_permission_basic(self):
         """
         Test basic permission assignment. If this test fails something is
         going extremely wrong...
-        """
+        """ 
         #test all permissions
-        self.assertEqual(self.user.has_perm(self.perm_test_role_a), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_b), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_c), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_d), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_one), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_two), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_three), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_four), False)
+        self.assertTrue(self.user.has_perm('rbac.opa_testmodel'))
+        self.assertTrue(self.user.has_perm('rbac.opb_testmodel'))
+        self.assertTrue(self.user.has_perm('rbac.opc_testmodel'))
+        self.assertTrue(self.user.has_perm('rbac.opd_testmodel'))
+        self.assertTrue(self.user.has_perm('rbac.opssd1_testmodel'))
+        self.assertTrue(self.user.has_perm('rbac.opssd2_testmodel'))
+        self.assertTrue(self.user.has_perm('rbac.opssd3_testmodel'))
+        self.assertFalse(self.user.has_perm('rbac.opssd4_testmodel'))
+  
 
-
+    @skipWithoutRbacUser
     def test_user_permission_role_deassign(self):
         """
-        Deassign "Role A" and run permission test.
+        Deassign "Role A" and test permissions.
         """
-        self.assertEqual(functions.DeassignUser(self.user, self.role_a), True)
+        self.assertTrue(functions.DeassignUser(self.user, self.role_a))
         
-        self.assertEqual(self.user.has_perm(self.perm_test_role_a), False)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_b), False)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_c), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_d), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_one), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_two), False)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_three), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_four), False)
+        self.assertFalse(self.user.has_perm('rbac.opa_testmodel'))
+        self.assertFalse(self.user.has_perm('rbac.opb_testmodel'))
+        self.assertTrue(self.user.has_perm('rbac.opc_testmodel'))
+        self.assertTrue(self.user.has_perm('rbac.opd_testmodel'))
+        self.assertTrue(self.user.has_perm('rbac.opssd1_testmodel'))
+        self.assertFalse(self.user.has_perm('rbac.opssd2_testmodel'))
+        self.assertTrue(self.user.has_perm('rbac.opssd3_testmodel'))
+        self.assertFalse(self.user.has_perm('rbac.opssd4_testmodel'))
 
     
+    @skipWithoutRbacUser
     def test_user_permission_after_hierarchy_change(self):
         """
         Test if permissions are inherited correctly after making changes in
@@ -82,22 +125,23 @@ class RbacBackendTest(TestCase):
         """
         #remove "Role B" from "Role A" and test permissions
         self.role_a.children.remove(self.role_b)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_a), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_b), False)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_one), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_two), False)
+        self.assertEqual(self.user.has_perm('rbac.opa_testmodel'), True)
+        self.assertEqual(self.user.has_perm('rbac.opb_testmodel'), False)
+        self.assertEqual(self.user.has_perm('rbac.opssd1_testmodel'), True)
+        self.assertEqual(self.user.has_perm('rbac.opssd2_testmodel'), False)
         
     
+    @skipWithoutRbacUser
     def test_user_permission_after_hierarchy_change2(self):
         """
         Remove "Role B" from hierarchy and add it again.
         """
         self.role_a.children.remove(self.role_b)
         self.role_a.children.add(self.role_b)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_a), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_b), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_one), True)
-        self.assertEqual(self.user.has_perm(self.perm_test_role_ssd_two), True)    
+        self.assertEqual(self.user.has_perm('rbac.opa_testmodel'), True)
+        self.assertEqual(self.user.has_perm('rbac.opb_testmodel'), True)
+        self.assertEqual(self.user.has_perm('rbac.opssd1_testmodel'), True)
+        self.assertEqual(self.user.has_perm('rbac.opssd2_testmodel'), True)    
 
 
     def test_role_cycle_in_graph(self):
@@ -108,6 +152,7 @@ class RbacBackendTest(TestCase):
         self.assertRaises(ValidationError, self.role_ssdthree.children.add, self.role_c)
 
 
+    @skipWithoutRbacUser
     def test_ssd_enforcement(self):
         """
         Test if SSD is enforced when assigning roles to a user.

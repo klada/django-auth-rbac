@@ -1,156 +1,156 @@
 [
-    {
-        "fields": {
-            "children": [
-                2, 
-                5
-            ], 
-            "create_date": "2012-11-23T14:12:37.546", 
-            "description": "", 
-            "name": "A", 
-            "permissions": [
-                [
-                    "test-role-a", 
-                    "rbac", 
-                    "rbacpermission"
-                ]
-            ], 
-            "touch_date": "2012-11-23T14:12:37.546"
-        }, 
-        "model": "rbac.rbacrole", 
-        "pk": 1
-    }, 
-    {
-        "fields": {
-            "children": [
-                6
-            ], 
-            "create_date": "2012-11-23T13:56:46.707", 
-            "description": "", 
-            "name": "B", 
-            "permissions": [
-                [
-                    "test-role-b", 
-                    "rbac", 
-                    "rbacpermission"
-                ]
-            ], 
-            "touch_date": "2012-11-23T13:56:46.707"
-        }, 
-        "model": "rbac.rbacrole", 
-        "pk": 2
-    }, 
-    {
-        "fields": {
-            "children": [
-                4
-            ], 
-            "create_date": "2012-11-23T12:43:00.167", 
-            "description": "", 
-            "name": "C", 
-            "permissions": [
-                [
-                    "test-role-c", 
-                    "rbac", 
-                    "rbacpermission"
-                ]
-            ], 
-            "touch_date": "2012-11-23T12:43:00.166"
-        }, 
-        "model": "rbac.rbacrole", 
-        "pk": 3
-    }, 
-    {
-        "fields": {
-            "children": [
-                5, 
-                7
-            ], 
-            "create_date": "2012-11-23T13:52:06.268", 
-            "description": "", 
-            "name": "D", 
-            "permissions": [
-                [
-                    "test-role-d", 
-                    "rbac", 
-                    "rbacpermission"
-                ]
-            ], 
-            "touch_date": "2012-11-23T13:52:06.268"
-        }, 
-        "model": "rbac.rbacrole", 
-        "pk": 4
-    }, 
-    {
-        "fields": {
-            "children": [], 
-            "create_date": "2012-11-23T12:38:05.387", 
-            "description": "", 
-            "name": "SSD1", 
-            "permissions": [
-                [
-                    "test-role-ssd-one", 
-                    "rbac", 
-                    "rbacpermission"
-                ]
-            ], 
-            "touch_date": "2012-11-23T12:38:05.387"
-        }, 
-        "model": "rbac.rbacrole", 
-        "pk": 5
-    }, 
-    {
-        "fields": {
-            "children": [], 
-            "create_date": "2012-11-23T12:39:39.719", 
-            "description": "", 
-            "name": "SSD2", 
-            "permissions": [
-                [
-                    "test-role-ssd-two", 
-                    "rbac", 
-                    "rbacpermission"
-                ]
-            ], 
-            "touch_date": "2012-11-23T12:39:39.719"
-        }, 
-        "model": "rbac.rbacrole", 
-        "pk": 6
-    }, 
-    {
-        "fields": {
-            "children": [], 
-            "create_date": "2012-11-23T12:39:44.691", 
-            "description": "", 
-            "name": "SSD3", 
-            "permissions": [
-                [
-                    "test-role-ssd-three", 
-                    "rbac", 
-                    "rbacpermission"
-                ]
-            ], 
-            "touch_date": "2012-11-23T12:39:44.690"
-        }, 
-        "model": "rbac.rbacrole", 
-        "pk": 7
-    }, 
-    {
-        "fields": {
-            "children": [], 
-            "create_date": "2012-11-23T12:39:47.971", 
-            "description": "", 
-            "name": "SSD4", 
-            "permissions": [
-                [
-                    "test-role-ssd-four", 
-                    "rbac", 
-                    "rbacpermission"
-                ]
-            ], 
-            "touch_date": "2012-11-23T12:39:47.971"
-        }, 
-        "model": "rbac.rbacrole", 
-        "pk": 8
+{
+    "pk": 1, 
+    "model": "rbac.rbacrole", 
+    "fields": {
+        "create_date": "2013-07-19T06:08:42.735", 
+        "name": "Role A", 
+        "description": "", 
+        "touch_date": "2013-07-19T06:08:42.735", 
+        "children": [
+            2, 
+            5
+        ], 
+        "permissions": [
+            [
+                "opa", 
+                "rbac", 
+                "testmodel"
+            ]
+        ]
     }
+},
+{
+    "pk": 2, 
+    "model": "rbac.rbacrole", 
+    "fields": {
+        "create_date": "2013-07-19T06:08:54.042", 
+        "name": "Role B", 
+        "description": "", 
+        "touch_date": "2013-07-19T06:08:54.042", 
+        "children": [
+            6
+        ], 
+        "permissions": [
+            [
+                "opb", 
+                "rbac", 
+                "testmodel"
+            ]
+        ]
+    }
+},
+{
+    "pk": 3, 
+    "model": "rbac.rbacrole", 
+    "fields": {
+        "create_date": "2013-07-19T06:09:03.479", 
+        "name": "Role C", 
+        "description": "", 
+        "touch_date": "2013-07-19T06:09:03.479", 
+        "children": [
+            4
+        ], 
+        "permissions": [
+            [
+                "opc", 
+                "rbac", 
+                "testmodel"
+            ]
+        ]
+    }
+},
+{
+    "pk": 4, 
+    "model": "rbac.rbacrole", 
+    "fields": {
+        "create_date": "2013-07-19T06:09:21.522", 
+        "name": "Role D", 
+        "description": "", 
+        "touch_date": "2013-07-19T06:09:21.522", 
+        "children": [
+            5, 
+            7
+        ], 
+        "permissions": [
+            [
+                "opd", 
+                "rbac", 
+                "testmodel"
+            ]
+        ]
+    }
+},
+{
+    "pk": 5, 
+    "model": "rbac.rbacrole", 
+    "fields": {
+        "create_date": "2013-07-18T12:50:02.909", 
+        "name": "Role SSD 1", 
+        "description": "", 
+        "touch_date": "2013-07-18T12:50:02.909", 
+        "children": [], 
+        "permissions": [
+            [
+                "opssd1", 
+                "rbac", 
+                "testmodel"
+            ]
+        ]
+    }
+},
+{
+    "pk": 6, 
+    "model": "rbac.rbacrole", 
+    "fields": {
+        "create_date": "2013-07-18T12:50:10.828", 
+        "name": "Role SSD 2", 
+        "description": "", 
+        "touch_date": "2013-07-18T12:50:10.828", 
+        "children": [], 
+        "permissions": [
+            [
+                "opssd2", 
+                "rbac", 
+                "testmodel"
+            ]
+        ]
+    }
+},
+{
+    "pk": 7, 
+    "model": "rbac.rbacrole", 
+    "fields": {
+        "create_date": "2013-07-18T12:50:21.698", 
+        "name": "Role SSD 3", 
+        "description": "", 
+        "touch_date": "2013-07-18T12:50:21.698", 
+        "children": [], 
+        "permissions": [
+            [
+                "opssd3", 
+                "rbac", 
+                "testmodel"
+            ]
+        ]
+    }
+},
+{
+    "pk": 8, 
+    "model": "rbac.rbacrole", 
+    "fields": {
+        "create_date": "2013-07-18T12:50:34.921", 
+        "name": "Role SSD 4", 
+        "description": "", 
+        "touch_date": "2013-07-18T12:50:34.921", 
+        "children": [], 
+        "permissions": [
+            [
+                "opssd4", 
+                "rbac", 
+                "testmodel"
+            ]
+        ]
+    }
+}
 ]

@@ -1,0 +1,31 @@
+digraph {
+  margin = 0;
+  // node defition
+  userassignment [shape=box, label=<RbacUserAssignment for user <i>test</i>>];
+
+  role_a [label=<Role A>];
+  role_b [label=<Role B>];
+  role_c [label=<Role C>];
+  role_d [label=<Role D>];
+ 
+  subgraph clusterSsd {
+    label=<SSD Constraint<br/><i>cardinality=3</i>>; style=dashed;labelloc=b;
+    role_ssd_1 [label=<Role SSD1>];
+    role_ssd_2 [label=<Role SSD2>];
+    role_ssd_3 [label=<Role SSD3>];
+    role_ssd_4 [label=<Role SSD4>];
+  };
+  
+
+  // graph definition
+  userassignment -> role_a;
+  userassignment -> role_c;
+
+  role_a -> role_b;
+  role_a -> role_ssd_1;
+  role_b -> role_ssd_2;
+  role_c -> role_d;
+  role_d -> role_ssd_1;
+  role_d -> role_ssd_3;
+
+}

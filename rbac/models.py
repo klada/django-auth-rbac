@@ -3,7 +3,7 @@ from logging import getLogger
 import itertools
 from Queue import Queue
 
-from django.db import connection, models
+from django.db import connection, models, transaction
 from django.db.models import Q
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
@@ -190,8 +190,6 @@ class RbacRoleProfile(AbstractBaseModel):
         A role profile is a cache which speeds up child/parent lookups for
         roles.
         """
-        from django.db import transaction
-
         logger.debug("Creating RbacRoleProfile")
         if settings.USE_TZ:
             currentTime = datetime.utcnow().replace(tzinfo=utc)
@@ -202,7 +200,7 @@ class RbacRoleProfile(AbstractBaseModel):
         bulk_list = []
         pairs = set()
 
-        with transaction.commit_manually():
+        with transaction.atomic():
             #create an adjacency list of the role hierarchy
             for parent, child in RbacRole.objects.exclude(children=None).values_list('id', 'children'):                
                 if parent in adj_list:
@@ -246,7 +244,6 @@ class RbacRoleProfile(AbstractBaseModel):
             #clear previous cache
             RbacRoleProfile.objects.all().delete()
             RbacRoleProfile.objects.bulk_create(bulk_list)
-            transaction.commit()
         
         logger.debug("Finished creating RbacRoleProfile")
 
@@ -280,16 +277,14 @@ class RbacPermissionProfile(AbstractBaseModel):
         Creates a new RbacPermissionProfile.
         
         A role profile basically is a cache which speeds up permission lookups.
-        """
-        from django.db import transaction
-        
+        """        
         logger.debug("Creating RbacPermissionProfile")
         if settings.USE_TZ:
             currentTime = datetime.utcnow().replace(tzinfo=utc)
         else:
             currentTime = datetime.now()
 
-        with transaction.commit_manually():
+        with transaction.atomic():
             #clear current permission profile
             RbacPermissionProfile.objects.all().delete()
     
@@ -309,7 +304,6 @@ class RbacPermissionProfile(AbstractBaseModel):
                                      )
       
             RbacPermissionProfile.objects.bulk_create(bulk_list)
-            transaction.commit()
         logger.debug("Finished creating RbacPermissionProfile")
 
 

@@ -54,10 +54,6 @@ You can use django-auth-rbac pretty much like *django.contrib.auth*. The syntax 
 Since RBAC permissions are tied to a specific model you should not add permissions manually. They are added automatically when running *syncdb*. Just like with *django.contrib.auth* you can specify additional model-permissions [directly in the model's **Meta** class](http://docs.djangoproject.com/en/1.5/ref/models/options/#permissions).
 
 
-### Model-level permissions
-You can also protect some of your model methods from being called by a user which does not have sufficient permissions. You only need to add the `rbac_model_permission_required` decorator from `rbac.decorators` to the model method you want to protect.
-
-
 Limitations
 -----------
 * Per-object permissions are not directly supported (only per-model permissions). However, it is possible to add a *_has_perm()* method to your models which can be used for checking context-sensitive permissions.

@@ -1,9 +1,11 @@
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.http import Http404, HttpResponseRedirect
+from django.views.decorators.cache import never_cache
 from rbac.forms import ActiveSessionRoleForm
 from rbac.models import RbacSession
 
+@never_cache
 def set_active_session_roles(request):
     """
     Shows a form allowing the user to set active roles for the current RBAC
@@ -29,14 +31,16 @@ def set_active_session_roles(request):
             my_form.save()
             return HttpResponseRedirect(redir)
     else:
-        #Store GET['next'] in session, because GET will be lost when POSTING
-        # form data.
-        request.session['redir'] = request.GET.get('next', '/')
+        redir = request.GET.get('next', None)
+        if not redir:
+            redir = request.META.get('HTTP_REFERER', '/')
+        #Store redir in session, because GE/REFERER will be lost when
+        # POSTING form data.
+        request.session['redir'] = redir
         my_form = ActiveSessionRoleForm(instance=rbac_session)
 
     return render_to_response('rbac/set_active_roles.html',
                               {'form': my_form,},
                               context_instance=RequestContext(request)
                              )
-
 

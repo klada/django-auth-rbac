@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from rbac.models import RbacRole, RbacSession, RbacUserAssignment
+from rbac.models import RbacRole, RbacSession, RbacPermissionProfile
 
 class ActiveSessionRoleForm(forms.ModelForm):
     """
@@ -31,6 +31,28 @@ class ActiveSessionRoleForm(forms.ModelForm):
         widgets = {
             'active_roles': forms.CheckboxSelectMultiple(),
         }
+
+def _get_app_label_choices():
+    app_labels = RbacPermissionProfile.objects.all().values_list(
+                    'permission__content_type__app_label',
+                    flat=True
+                 ).distinct()
+    choices = [('', '---------')]
+    choices.extend([(i,i) for i in app_labels])
+    return choices
+
+def _get_model_choices():
+    models = RbacPermissionProfile.objects.all().values_list(
+                 'permission__content_type__model',
+                 flat=True
+             ).distinct()
+    choices = [('', '---------')]
+    choices.extend([(i,i) for i in models])
+    return choices
+
+class EffectivePermissionFilterForm(forms.Form):
+    app_label = forms.ChoiceField(label="App", required=False, choices=_get_app_label_choices())
+    model = forms.ChoiceField(label="Model", required=False, choices=_get_model_choices())
 
 
 class RbacRoleForm(forms.ModelForm):

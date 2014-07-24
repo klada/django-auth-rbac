@@ -11,3 +11,45 @@
 .rbac-submit-row input[type="submit"].default {
     float: none;
 }
+
+body.rbacroles #content {
+	margin: 10px 15px;
+	display: block;
+}
+
+body.rbacroles {
+	margin: 0;
+    padding: 0;
+    font-size: 12px;
+    font-family: "Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+    color: #333;
+    background: #eee;
+}
+
+body.rbacroles #container {
+    background: white;
+    border: 1px solid #ccc;
+    width: 28em;
+    min-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 100px;
+}
+
+body.rbacroles #content-main {
+    width: 100%;
+}
+
+body.rbacroles #header {
+    background: #417690;
+    color: #ffc;
+    overflow: hidden;
+}
+
+body.rbacroles #branding h1 {
+    padding: 0 10px;
+    font-size: 18px;
+    margin: 8px 0;
+    font-weight: normal;
+    color: #f4f379;
+}

@@ -316,13 +316,16 @@ class RbacSession(AbstractBaseModel):
     setting 'RBAC_DEFAULT_ROLES'.
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True)
-    backend_session = models.BooleanField(default=True)
+    # Use NULL for frontend sessions (multiple sessions per user allowed) and
+    # True for backend sessions. This way the database can check for uniqueness.
+    backend_session = models.NullBooleanField(default=True) 
     active_roles = models.ManyToManyField(RbacRole)
     expire_date = models.DateTimeField(editable=False)
 
 
     class Meta:
         db_table = 'auth_rbac_session'
+        unique_together = ('user', 'backend_session')
         verbose_name = _("RBAC session")
         verbose_name_plural = _("RBAC sessions")
 
@@ -364,12 +367,6 @@ class RbacSession(AbstractBaseModel):
                    role__in=self.active_roles.all()
                ).count() > 0
     
-    
-    def clean(self):
-        if self.backend_session and RbacSession.objects.filter(user=self.user, backend_session=True).exclude(id=self.pk).count() > 0:
-            raise ValidationError('Only one backend session is allowed per user!')
-
-
     @staticmethod
     def clear_expired():
         """
@@ -381,7 +378,6 @@ class RbacSession(AbstractBaseModel):
             now = datetime.now()
         RbacSession.objects.filter(expire_date__lt=now).delete()
     
-
     def save(self, *args, **kwargs):
         """
         Saves the session and assigns the default set of active roles for

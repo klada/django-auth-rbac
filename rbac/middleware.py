@@ -15,7 +15,7 @@ class RbacSessionMiddleware(object):
             return
         
         try:
-            rbac_session_id = request.session.get('_rbac_session_id', 0)
+            rbac_session_id = request.session.get('_rbac_session_id', None)
         except AttributeError:
             raise ImproperlyConfigured(
                 "The RBAC session middleware requires the"
@@ -24,13 +24,13 @@ class RbacSessionMiddleware(object):
                 " 'django.contrib.sessions.middleware.SessionMiddleware'"
                 " before the RbacSessionMiddleware class.")
 
-        if rbac_session_id == 0:
-            rbac_session = RbacSession.objects.create(user=request.user, backend_session=False)
+        if not rbac_session_id:
+            rbac_session = RbacSession.objects.create(user=request.user, backend_session=None)
         else:
             try:
                 rbac_session = RbacSession.objects.get(id=rbac_session_id, user=request.user)
             except ObjectDoesNotExist:
-                rbac_session = RbacSession.objects.create(user=request.user, backend_session=False)          
+                rbac_session = RbacSession.objects.create(user=request.user, backend_session=None)          
                 
         request.session['_rbac_session_id'] = rbac_session.id
         request.user._rbac_session = rbac_session

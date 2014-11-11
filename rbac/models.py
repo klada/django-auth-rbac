@@ -84,7 +84,7 @@ class RbacRole(AbstractBaseModel):
     """
     name = models.CharField(max_length=255, db_index=True, unique=True)
     description = models.TextField(blank=True)
-    displayName = models.CharField(max_length=254, verbose_name=_('Display name'))
+    displayName = models.CharField(blank=True, max_length=254, verbose_name=_('Display name'))
     children =  models.ManyToManyField( 'self', symmetrical=False, blank=True)
     permissions = models.ManyToManyField(RbacPermission, blank=True)
     children_all = models.ManyToManyField( 'self', symmetrical=False, blank=True, editable=False, through="RbacRoleProfile", related_name="parents_all")

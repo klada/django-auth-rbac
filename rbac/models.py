@@ -94,6 +94,7 @@ class RbacRole(AbstractBaseModel):
     permissions = models.ManyToManyField(RbacPermission, blank=True)
     children_all = models.ManyToManyField( 'self', symmetrical=False, blank=True, editable=False, through="RbacRoleProfile", related_name="parents_all")
 
+    objects = RbacRoleManager()
 
     def __unicode__(self):
         return self.name

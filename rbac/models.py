@@ -78,11 +78,6 @@ class RbacPermission(AbstractBaseModel):
     natural_key.dependencies = ['contenttypes.contenttype']
 
 
-class RbacRoleManager(models.Manager):
-    def get_by_natural_key(self, name):
-        return self.get(name=name)
-
-
 class RbacRole(AbstractBaseModel):
     """
     A role that can be assigned to users and other roles.
@@ -93,8 +88,6 @@ class RbacRole(AbstractBaseModel):
     children =  models.ManyToManyField( 'self', symmetrical=False, blank=True)
     permissions = models.ManyToManyField(RbacPermission, blank=True)
     children_all = models.ManyToManyField( 'self', symmetrical=False, blank=True, editable=False, through="RbacRoleProfile", related_name="parents_all")
-
-    objects = RbacRoleManager()
 
     def __unicode__(self):
         return self.name
@@ -170,9 +163,6 @@ class RbacRole(AbstractBaseModel):
         @rtype: QuerySet
         """
         return RbacRole.objects.filter(children=self)
-    
-    def natural_key(self):
-        return (self.name, )
  
 
 class RbacRoleProfile(AbstractBaseModel):

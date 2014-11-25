@@ -90,7 +90,10 @@ class RbacRole(AbstractBaseModel):
     children_all = models.ManyToManyField( 'self', symmetrical=False, blank=True, editable=False, through="RbacRoleProfile", related_name="parents_all")
 
     def __unicode__(self):
-        return self.name
+        if self.displayName:
+            return self.displayName
+        else:
+            return self.name
 
     def __init__(self, *args, **kwargs):
         super(RbacRole, self).__init__(*args, **kwargs)

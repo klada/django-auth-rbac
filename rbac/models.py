@@ -17,7 +17,7 @@ from django.utils.translation import ugettext
 logger = getLogger("rbac.models")
 
 class AbstractBaseModel(models.Model):
-    touch_date = models.DateTimeField(editable=False, auto_now=True, auto_now_add=True)
+    touch_date = models.DateTimeField(editable=False, auto_now_add=True)
     create_date = models.DateTimeField(editable=False, auto_now=True)
 
     class Meta:

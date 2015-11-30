@@ -97,6 +97,7 @@ class RbacUser(AbstractUser):
     class Meta:
         app_label = 'rbac'
         db_table = 'auth_rbac_user'
+        swappable = 'AUTH_USER_MODEL'
 
     def get_all_roles(self):
         """

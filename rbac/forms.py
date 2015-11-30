@@ -62,6 +62,7 @@ class RbacRoleForm(forms.ModelForm):
 
     class Meta:
         model = RbacRole
+        exclude = ('children_all', )
 
 
     def __init__(self, *args, **kwargs):

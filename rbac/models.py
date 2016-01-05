@@ -423,7 +423,7 @@ class RbacSsdSet(AbstractBaseModel):
 
 
 class RbacUserAssignment(AbstractBaseModel):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, unique=True, db_index=True)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL)
     roles = models.ManyToManyField(RbacRole)
 
     def __unicode__(self):

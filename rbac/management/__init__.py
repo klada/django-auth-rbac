@@ -1,7 +1,8 @@
 """
-Automatically creates permissions for non-system apps after calling syncdb.
+Automatically creates permissions for non-system apps after calling migrate.
 """
-from django.db.models import get_models, signals
+from django.db.models import signals
+from django.apps import apps
 from django.dispatch import receiver
 from rbac.models import RbacPermission
 
@@ -20,19 +21,21 @@ def _get_all_permissions(obj_meta_class):
     return perms + list(obj_meta_class.permissions)
 
 
-def create_permissions(app, created_models, verbosity, **kwargs):
+def create_permissions(app_config, verbosity, **kwargs):
     """
     Creates all of the permissions defined in a model and a set of default
     permissions.
     """
+    if not app_config.models_module:
+        return
+    
     from django.contrib.contenttypes.models import ContentType
     #do not add permissions for rbac and django models
     #@TODO: needed for Django admin
     #if app.__name__ == "rbac.models" or \
     #   app.__name__.startswith("django"):
     #    return
-    
-    app_models = get_models(app)
+    app_models = app_config.get_models()
 
     # This will hold the permissions we're looking for as
     # (content_type, (name, description))
@@ -65,4 +68,4 @@ def create_permissions(app, created_models, verbosity, **kwargs):
 
 # Do not add permissions to "auth_permission", as it is not used
 signals.post_syncdb.disconnect(dispatch_uid="django.contrib.auth.management.create_permissions")
-signals.post_syncdb.connect(create_permissions, dispatch_uid="rbac.management.create_permissions")
+#signals.post_syncdb.connect(create_permissions, dispatch_uid="rbac.management.create_permissions")

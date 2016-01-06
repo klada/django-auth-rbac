@@ -479,7 +479,6 @@ class AbstractRbacUser(models.Model):
 
         @rtype: QuerySet
         """
-        from rbac.models import RbacRole
         return RbacRole.objects.filter(rbacuserassignment__user=self)
 
     def get_all_permissions(self, obj=None):
@@ -545,9 +544,7 @@ class RbacUser(AbstractUser):
 
         @rtype: QuerySet
         """
-        from rbac.models import RbacRole
         return RbacRole.objects.filter(rbacuserassignment__user=self)
-
 
     def get_all_permissions(self, obj=None):
         if not self.__rbac_backend:

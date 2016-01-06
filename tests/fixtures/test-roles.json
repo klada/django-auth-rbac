@@ -14,7 +14,7 @@
         "permissions": [
             [
                 "opa", 
-                "rbac", 
+                "tests", 
                 "testmodel"
             ]
         ]
@@ -34,7 +34,7 @@
         "permissions": [
             [
                 "opb", 
-                "rbac", 
+                "tests", 
                 "testmodel"
             ]
         ]
@@ -54,7 +54,7 @@
         "permissions": [
             [
                 "opc", 
-                "rbac", 
+                "tests", 
                 "testmodel"
             ]
         ]
@@ -75,7 +75,7 @@
         "permissions": [
             [
                 "opd", 
-                "rbac", 
+                "tests", 
                 "testmodel"
             ]
         ]
@@ -93,7 +93,7 @@
         "permissions": [
             [
                 "opssd1", 
-                "rbac", 
+                "tests", 
                 "testmodel"
             ]
         ]
@@ -111,7 +111,7 @@
         "permissions": [
             [
                 "opssd2", 
-                "rbac", 
+                "tests", 
                 "testmodel"
             ]
         ]
@@ -129,7 +129,7 @@
         "permissions": [
             [
                 "opssd3", 
-                "rbac", 
+                "tests", 
                 "testmodel"
             ]
         ]
@@ -147,7 +147,7 @@
         "permissions": [
             [
                 "opssd4", 
-                "rbac", 
+                "tests", 
                 "testmodel"
             ]
         ]

@@ -180,6 +180,7 @@ class RbacRoleProfile(AbstractBaseModel):
     child = models.ForeignKey(RbacRole, db_index=True, related_name="rbacroleprofile_child")
 
     class Meta:
+        app_label = 'rbac'
         db_table = 'auth_rbac_roleprofile'
         unique_together = ('parent', 'child')
   
@@ -328,6 +329,7 @@ class RbacSession(AbstractBaseModel):
 
 
     class Meta:
+        app_label = 'rbac'
         db_table = 'auth_rbac_session'
         unique_together = ('user', 'backend_session')
         verbose_name = _("RBAC session")
@@ -405,6 +407,7 @@ class RbacSsdSet(AbstractBaseModel):
     cardinality = models.PositiveIntegerField(default=2)
 
     class Meta:
+        app_label = 'rbac'
         db_table = 'auth_rbac_ssdset'
         verbose_name = _("RBAC Static Separation of Duty Constraint")
         verbose_name_plural = _("RBAC Static Separation of Duty Constraints")
@@ -431,6 +434,7 @@ class RbacUserAssignment(AbstractBaseModel):
         return u'RBAC role assignment for user "%s"' %self.user
 
     class Meta:
+        app_label = 'rbac'
         db_table = 'auth_rbac_userassignment'
         verbose_name = _("RBAC user assignment")
         verbose_name_plural = _("RBAC user assignments")

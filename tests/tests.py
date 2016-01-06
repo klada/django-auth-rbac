@@ -1,12 +1,10 @@
-from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.management import call_command
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.test import TestCase
 from django.test.utils import override_settings
 from rbac import functions
 from rbac import models
-from .models import TestModel
 
 def skipWithoutRbacUser(func):
     """
@@ -130,11 +128,12 @@ class RbacBackendTest(TestCase):
         """
         Test if SSD is enforced when assigning roles to a user.
         """
-        self.assertRaises(ValidationError, functions.AssignUser, self.user, self.role_ssdfour)
+        with transaction.atomic():
+            self.assertRaises(ValidationError, functions.AssignUser, self.user, self.role_ssdfour)
         self.assertEqual(functions.DeassignUser(self.user, self.role_a), True)
         self.assertEqual(functions.AssignUser(self.user, self.role_ssdfour), True)
-        self.assertRaises(ValidationError, functions.AssignUser, self.user, self.role_a)
-
+        with transaction.atomic():
+            self.assertRaises(ValidationError, functions.AssignUser, self.user, self.role_a)
 
     def test_ssd_change_cardinality_simple(self):
         """
@@ -190,8 +189,10 @@ class RbacBackendTest(TestCase):
         Test if adding child roles to a RbacRole which would violate a SSD set
         are detected.
         """
-        self.assertRaises(ValidationError, functions.AddInheritance, self.role_b, self.role_ssdfour)
+        with transaction.atomic():
+            self.assertRaises(ValidationError, functions.AddInheritance, self.role_b, self.role_ssdfour)
         
         self.assertEqual(functions.DeassignUser(self.user, self.role_a), True)
         self.assertEqual(functions.AddInheritance(self.role_b, self.role_ssdfour), True)
-        self.assertRaises(ValidationError, functions.AddInheritance, self.role_b, self.role_c)
+        with transaction.atomic():
+            self.assertRaises(ValidationError, functions.AddInheritance, self.role_b, self.role_c)

@@ -51,8 +51,8 @@ def _get_model_choices():
     return choices
 
 class EffectivePermissionFilterForm(forms.Form):
-    app_label = forms.ChoiceField(label="App", required=False, choices=_get_app_label_choices())
-    model = forms.ChoiceField(label="Model", required=False, choices=_get_model_choices())
+    app_label = forms.ChoiceField(label="App", required=False, choices=_get_app_label_choices)
+    model = forms.ChoiceField(label="Model", required=False, choices=_get_model_choices)
 
 
 class RbacRoleForm(forms.ModelForm):

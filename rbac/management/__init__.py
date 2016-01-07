@@ -4,7 +4,6 @@ Automatically creates permissions for non-system apps after calling migrate.
 from django.db.models import signals
 from django.apps import apps
 from django.dispatch import receiver
-from rbac.models import RbacPermission
 
 
 def _get_all_permissions(obj_meta_class):
@@ -30,6 +29,8 @@ def create_permissions(app_config, verbosity, **kwargs):
         return
     
     from django.contrib.contenttypes.models import ContentType
+    from rbac.models import RbacPermission
+
     #do not add permissions for rbac and django models
     #@TODO: needed for Django admin
     #if app.__name__ == "rbac.models" or \
@@ -67,5 +68,4 @@ def create_permissions(app_config, verbosity, **kwargs):
 
 
 # Do not add permissions to "auth_permission", as it is not used
-signals.post_syncdb.disconnect(dispatch_uid="django.contrib.auth.management.create_permissions")
-#signals.post_syncdb.connect(create_permissions, dispatch_uid="rbac.management.create_permissions")
+signals.post_migrate.disconnect(dispatch_uid="django.contrib.auth.management.create_permissions")

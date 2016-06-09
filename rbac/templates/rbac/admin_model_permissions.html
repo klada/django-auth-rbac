@@ -1,0 +1,42 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Permissions by model" %}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label='rbac' %}">{% trans "RBAC" %}</a>
+&rsaquo; <a href="{% url 'admin:rbac_rbacrole_changelist' %}">{% trans "RBAC Roles" %}</a>
+&rsaquo; {% trans "Permissions by model" %}
+</div>
+{% endblock %}
+
+{% block content %}
+<h1>{% trans "Permissions by model" %}</h1>
+
+<p>{% blocktrans %}The following table provides an overview of the model permissions which are currently assigned to roles.{% endblocktrans %}</p>
+
+<table>
+ <thead>
+  <tr>
+   <th>{% trans "Permission" %}</th>
+   <th>{% trans "RBAC Roles" %}</th>
+  </tr>
+ </thead>
+ <tbody>
+ {% for contenttype, permissions in permissions_by_ctype.items %}
+  <tr>
+   <td colspan=2 style="font-weight:bold;background-color:#CDCDCD;">{{contenttype.app_label}}.{{contenttype.model}} ({{contenttype}})</td>
+  </tr>
+  {% for perm in permissions %}
+  <tr>
+   <td>{{perm.name}}</td>
+   <td>{{perm.rbacrole_set.all|join:", "}}</td>
+  </tr>
+   {% endfor %}
+ {% endfor %}
+ </tbody>
+</table>
+
+{% endblock content %}

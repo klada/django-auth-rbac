@@ -1,5 +1,7 @@
+from collections import OrderedDict
 from django.conf.urls import patterns, url
 from django.contrib import admin
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
@@ -33,14 +35,16 @@ class RoleAdmin(admin.ModelAdmin):
     list_display = ('name', '_admin_effective_permissions')
     filter_horizontal = ('permissions', 'children' )
     change_form_template = 'rbac/change_form.html'
+    change_list_template = 'rbac/change_list.html'
         
     def get_urls(self):
         urls = super(RoleAdmin, self).get_urls()
         my_urls = patterns('',
-            url(r'^(\d+)/effective_permissions/$', self.view_effective_permissions)
+            url(r'^(\d+)/effective_permissions/$', self.view_effective_permissions),
+            url(r'^modelpermissions/$', self.view_permissions_by_model, name='rbac_rbacrole_permissions_by_model')
         )
         return my_urls + urls
-    
+
 
     def view_effective_permissions(self, request, role_id):
         """
@@ -78,6 +82,32 @@ class RoleAdmin(admin.ModelAdmin):
                 'permissions': permissions,
                  'role': role
             }
+        )
+    
+    def view_permissions_by_model(self, request):
+        """
+        Renders a table which shows all of the model permissions
+        which are assigned to roles.
+        """
+        permissions = models.RbacPermission.objects.all().order_by(
+                        'content_type__app_label', 'content_type__model', 'name'
+                    ).select_related(
+                        'content_type'
+                    ).prefetch_related(
+                        # Prefetching prevents quering the database for each permission
+                        Prefetch('rbacrole_set')
+                    ).exclude(rbacrole=None)
+    
+        permissions_by_content_type = OrderedDict()
+        for permission in permissions:
+            if permission.content_type not in permissions_by_content_type:
+                permissions_by_content_type[permission.content_type] = []
+            permissions_by_content_type[permission.content_type].append(permission)
+        
+        return TemplateResponse(
+            request,
+            'rbac/admin_model_permissions.html', 
+            {'permissions_by_ctype': permissions_by_content_type}
         )
     
 

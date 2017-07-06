@@ -79,6 +79,71 @@ class RbacPermission(AbstractBaseModel):
     natural_key.dependencies = ['contenttypes.contenttype']
 
 
+class RbacRoleQuerySet(models.QuerySet):
+    def topsorted(self):
+        """
+        When dumping `RbacRoles` to fixtures you have to take extra care with the foreign key constraints. Since the
+        `RbacRole` model references itself through `children`, it is essential that when dumping a role graph the roles
+        need to be dumped in the correct order - from "leaf nodes" (roles without children) to top-level roles. This
+        method can be used for resolving these dependencies.
+
+        .. important::
+           Always use this method when dumping roles as fixtures. Otherwise they might not load.
+
+        .. attention::
+           Does *not* return a `QuerySet`!
+
+        :return: An iterable of `RbacRole` objects which is sorted by foreign key dependencies.
+        :rtype: iterable
+        """
+        # This is used for mapping ids to objects
+        roles = {}
+
+        """
+        A role's children are predecessors of the role when it comes to resolving foreign key dependencies. They
+        need to be created first. So when creating a top-sorted list of roles the "leaf" roles (roles without
+        children) need to be first in the list.
+
+        Algorithm:
+        
+            1. For each role we store their actual parents and the number of children.
+            
+               The parents are saved in a dict of sets (`roles_parents[role_pk]`) and the number of children
+               for each role are stored in a separate dict (`roles_num_children`)
+            
+            2. Then we try to find all roles which do not have any children. We can yield these roles and mark them
+               as handled by removing them from `roles_num_children`. Since they are now handled we can notify their
+               parents that they have one child less to care about (dependency-wise). We do that by decrementing the
+               child counter for each parent.
+            
+            3. We do #2 until `roles_num_children` is empty.
+        
+        Obviously the algorithm can only come to an end when the role graph is free of circles (which is enforced when
+        adding new children).
+        """
+
+        roles_num_children = {}
+        roles_parents = {}
+        for r in self.iterator():
+            roles[r.pk] = r
+            children = set(r.children.values_list('pk', flat=True))
+            roles_num_children[r.pk] = len(children)
+            for child_pk in children:
+                if child_pk not in roles_parents:
+                    roles_parents[child_pk] = set()
+                roles_parents[child_pk].add(r.pk)
+
+        while roles_num_children:
+            for role_pk, num_children in roles_num_children.items():
+                if num_children == 0:
+                    yield roles[role_pk]
+                    del roles_num_children[role_pk]
+                    if role_pk in roles_parents:
+                        for parent_pk in roles_parents[role_pk]:
+                            roles_num_children[parent_pk] -= 1
+                        # roles_parents[role_pk] will never be accessed again
+
+
 class RbacRoleManager(models.Manager):
     """
     Custom manager with support for natural key lookup.
@@ -98,7 +163,7 @@ class RbacRole(AbstractBaseModel):
     permissions = models.ManyToManyField(RbacPermission, blank=True)
     children_all = models.ManyToManyField( 'self', symmetrical=False, blank=True, editable=False, through="RbacRoleProfile", related_name="parents_all")
 
-    objects = RbacRoleManager()
+    objects = RbacRoleManager.from_queryset(RbacRoleQuerySet)()
 
     def __unicode__(self):
         if self.displayName:

@@ -124,7 +124,9 @@ class RbacRoleQuerySet(models.QuerySet):
 
         roles_num_children = {}
         roles_parents = {}
+        max_iterations = 0
         for r in self.iterator():
+            max_iterations += 1
             roles[r.pk] = r
             children = set(r.children.values_list('pk', flat=True))
             roles_num_children[r.pk] = len(children)
@@ -133,6 +135,7 @@ class RbacRoleQuerySet(models.QuerySet):
                     roles_parents[child_pk] = set()
                 roles_parents[child_pk].add(r.pk)
 
+        num_iterations = 0
         while roles_num_children:
             for role_pk, num_children in roles_num_children.items():
                 if num_children == 0:
@@ -142,6 +145,15 @@ class RbacRoleQuerySet(models.QuerySet):
                         for parent_pk in roles_parents[role_pk]:
                             roles_num_children[parent_pk] -= 1
                         # roles_parents[role_pk] will never be accessed again
+            num_iterations += 1
+            # Make sure that we come to an end even if the role queryset does not contain the entire role graph
+            # required for top-sorting.
+            # In this case still all remaining roles are returned by the for-loop below.
+            if num_iterations > max_iterations:
+                break
+
+        for pk in roles_num_children:
+            yield roles[pk]
 
 
 class RbacRoleManager(models.Manager):
@@ -819,7 +831,7 @@ def _rbac_role_children_validate(sender, instance, action, reverse, model, pk_se
     
         - check for cycle in the role graph.
         - check if adding a child role violates a SSD policy
-    """   
+    """
     if action == 'pre_add':
         if instance.pk in pk_set:
             raise ValidationError("Adding this child role would result in a cycle in the role graph!")

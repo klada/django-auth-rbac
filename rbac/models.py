@@ -811,7 +811,8 @@ def _rbac_check_role_ssd_ua(node_id, ssd_roles_set, ssd_cardinality):
         raise ValidationError("One or more RbacUserAssignments would be affected by this change!")   
 
 
-@receiver(models.signals.m2m_changed, sender=RbacRole.permissions.through)
+@receiver(models.signals.m2m_changed, sender=RbacRole.permissions.through,
+          dispatch_uid="rbac.rbac_role_permissions_changed")
 def _rbac_role_permissions_changed(sender, instance, action, reverse, model, pk_set, **kwargs):
     """
     After adding/removing permissions we need to make sure to re-create the
@@ -821,7 +822,8 @@ def _rbac_role_permissions_changed(sender, instance, action, reverse, model, pk_
         RbacPermissionProfile.create()
     
 
-@receiver(models.signals.m2m_changed, sender=RbacRole.children.through)
+@receiver(models.signals.m2m_changed, sender=RbacRole.children.through,
+          dispatch_uid="rbac.rbac_role_children_changed")
 def _rbac_role_children_changed(sender, instance, action, reverse, model, pk_set, **kwargs):
     """
     Re-creates the RbacRoleProfile and RbacPermissionProfile after adding or
@@ -834,7 +836,8 @@ def _rbac_role_children_changed(sender, instance, action, reverse, model, pk_set
         RbacPermissionProfile.create()
 
 
-@receiver(models.signals.m2m_changed, sender=RbacSession.active_roles.through)
+@receiver(models.signals.m2m_changed, sender=RbacSession.active_roles.through,
+          dispatch_uid="rbac.rbac_session_validate_roles")
 def _rbac_session_validate_roles(sender, instance, action, reverse, model, pk_set, **kwargs):
     """
     Makes sure that only valid roles are assigned to an RbacSession.
@@ -848,7 +851,8 @@ def _rbac_session_validate_roles(sender, instance, action, reverse, model, pk_se
                "At least one role is not assigned to the session user!")
 
 
-@receiver(models.signals.m2m_changed, sender=RbacRole.children.through)
+@receiver(models.signals.m2m_changed, sender=RbacRole.children.through,
+          dispatch_uid="rbac.rbac_role_children_validate")
 def _rbac_role_children_validate(sender, instance, action, reverse, model, pk_set, **kwargs):
     """
     Validates the children of a role prior to adding them.
@@ -918,7 +922,8 @@ def _rbac_role_children_validate(sender, instance, action, reverse, model, pk_se
             _rbac_check_role_ssd_ua(instance.id, ua_ssd_roles, max_ua_cardinality)
                             
 
-@receiver(models.signals.m2m_changed, sender=RbacSsdSet.roles.through)
+@receiver(models.signals.m2m_changed, sender=RbacSsdSet.roles.through,
+          dispatch_uid="rbac.rbac_ssd_validation")
 def _rbac_ssd_validation(sender, instance, action, pk_set, **kwargs):
     """
     Validates a SSD set.
@@ -946,7 +951,8 @@ def _rbac_ssd_validation(sender, instance, action, pk_set, **kwargs):
         _rbac_check_ssd_userassignment(roles.values_list('id', flat=True), instance.cardinality)
 
 
-@receiver(models.signals.m2m_changed, sender=RbacUserAssignment.roles.through)
+@receiver(models.signals.m2m_changed, sender=RbacUserAssignment.roles.through,
+          dispatch_uid="rbac.rbac_ssd_enforcement")
 def _rbac_ssd_enforcement(instance, action, pk_set, **kwargs):
     """
     Enforces the Static Separation of Duty constraints when adding roles
@@ -988,7 +994,9 @@ def _rbac_ssd_enforcement(instance, action, pk_set, **kwargs):
                "A static separation of duty policy prevents you from adding"
                " this role!")
 
-@receiver(models.signals.m2m_changed, sender=RbacUserAssignment.roles.through)
+
+@receiver(models.signals.m2m_changed, sender=RbacUserAssignment.roles.through,
+          dispatch_uid="rbac.rbac_userassignment_roles_changed")
 def _rbac_userassignment_roles_changed(sender, instance, action, reverse, model, pk_set, **kwargs):
     """
     When roles were added or removed from the RbacUserAssignment we also have
@@ -1004,7 +1012,8 @@ def _rbac_userassignment_roles_changed(sender, instance, action, reverse, model,
         RbacSession.objects.filter(user=instance.user).delete()
 
 
-@receiver(models.signals.post_delete, sender=RbacUserAssignment)
+@receiver(models.signals.post_delete, sender=RbacUserAssignment,
+          dispatch_uid="rbac.rbac_userassignment_delete")
 def _rbac_userassignment_delete(sender, instance, **kwargs):
     """
     Makes sure that RbacSessions are invalidated when removing a

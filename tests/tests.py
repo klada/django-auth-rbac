@@ -4,7 +4,7 @@ from django.db import transaction
 from django.test import TestCase
 from django.test.utils import override_settings
 from rbac import functions
-from rbac import models
+from rbac.models import RbacPermissionProfile, RbacRoleProfile, RbacRole, RbacSsdSet, RbacPermission, RbacUser
 
 def skipWithoutRbacUser(func):
     """
@@ -14,7 +14,7 @@ def skipWithoutRbacUser(func):
     def _decorated(*args, **kwargs):
         self = args[0]
         model = get_user_model()
-        if not issubclass(model, models.RbacUser):
+        if not issubclass(model, RbacUser):
             return self.skipTest('No RBAC user could be loaded')
         else:       
             return func(*args, **kwargs)
@@ -23,28 +23,67 @@ def skipWithoutRbacUser(func):
 
 @override_settings(RBAC_DEFAULT_ROLES = 'all', USE_TZ=False)
 class RbacBackendTest(TestCase):
-    fixtures = [
-        'test-roles.json',
-        'test-ssdsets.json',
-    ]   
-    
+
+    @classmethod
+    def setUpClass(cls):
+        super(RbacBackendTest, cls).setUpClass()
+        # Create roles and assign permissions
+        role_a = RbacRole.objects.create(name="Role A")
+        role_a.permissions.add(RbacPermission.objects.get(name="opa"))
+        role_b = RbacRole.objects.create(name="Role B")
+        role_b.permissions.add(RbacPermission.objects.get(name="opb"))
+        role_c = RbacRole.objects.create(name="Role C")
+        role_c.permissions.add(RbacPermission.objects.get(name="opc"))
+        role_d = RbacRole.objects.create(name="Role D")
+        role_d.permissions.add(RbacPermission.objects.get(name="opd"))
+
+        role_ssdone = RbacRole.objects.create(name="Role SSD 1")
+        role_ssdone.permissions.add(RbacPermission.objects.get(name="opssd1"))
+
+        role_ssdtwo = RbacRole.objects.create(name="Role SSD 2")
+        role_ssdtwo.permissions.add(RbacPermission.objects.get(name="opssd2"))
+
+        role_ssdthree = RbacRole.objects.create(name="Role SSD 3")
+        role_ssdthree.permissions.add(RbacPermission.objects.get(name="opssd3"))
+
+        role_ssdfour = RbacRole.objects.create(name="Role SSD 4")
+        role_ssdfour.permissions.add(RbacPermission.objects.get(name="opssd4"))
+
+        # Define role hierarchy
+        # For a visualization of the test role graph see doc/test_role_graph.pdf
+        role_a.children.add(role_b)
+        role_a.children.add(role_ssdone)
+
+        role_b.children.add(role_ssdtwo)
+
+        role_c.children.add(role_d)
+
+        role_d.children.add(role_ssdone)
+        role_d.children.add(role_ssdthree)
+
+        # Define SSD set
+        ssdset = RbacSsdSet.objects.create(
+            name="Test SSD", description="This SSD set is used for testing SSD enforcement", cardinality=4
+        )
+        ssdset.roles = RbacRole.objects.filter(name__startswith="Role SSD")
+
     def setUp(self):
+        RbacRoleProfile.create()
+        RbacPermissionProfile.create()
+
         #after loading fixtures we need to populate the role and permission
         # profiles first
-        models.RbacRoleProfile.create()
-        models.RbacPermissionProfile.create()
-        
-        self.role_a = models.RbacRole.objects.get(name="Role A")
-        self.role_b = models.RbacRole.objects.get(name="Role B")
-        self.role_c = models.RbacRole.objects.get(name="Role C")
-        self.role_d = models.RbacRole.objects.get(name="Role D")
-        self.role_ssdone = models.RbacRole.objects.get(name="Role SSD 1")
-        self.role_ssdtwo = models.RbacRole.objects.get(name="Role SSD 2")
-        self.role_ssdthree = models.RbacRole.objects.get(name="Role SSD 3")
-        self.role_ssdfour = models.RbacRole.objects.get(name="Role SSD 4")
+        self.role_a = RbacRole.objects.get(name="Role A")
+        self.role_b = RbacRole.objects.get(name="Role B")
+        self.role_c = RbacRole.objects.get(name="Role C")
+        self.role_d = RbacRole.objects.get(name="Role D")
+        self.role_ssdone = RbacRole.objects.get(name="Role SSD 1")
+        self.role_ssdtwo = RbacRole.objects.get(name="Role SSD 2")
+        self.role_ssdthree = RbacRole.objects.get(name="Role SSD 3")
+        self.role_ssdfour = RbacRole.objects.get(name="Role SSD 4")
 
         # We're using the RBAC user model and do not need any fixtures.
-        self.user = get_user_model().objects.create(id=1)
+        self.user = get_user_model().objects.create(id=1, username="test")
 
         functions.AssignUser(self.user, self.role_a)
         functions.AssignUser(self.user, self.role_c)
@@ -59,7 +98,7 @@ class RbacBackendTest(TestCase):
         """
         Test basic permission assignment. If this test fails something is
         going extremely wrong...
-        """ 
+        """
         #test all permissions
         self.assertTrue(self.user.has_perm('tests.opa_testmodel'))
         self.assertTrue(self.user.has_perm('tests.opb_testmodel'))
@@ -140,7 +179,7 @@ class RbacBackendTest(TestCase):
         Test if changes to the SSD cardinality are handled correctly.
         """
         #cardinality of 3 is invalid, as it affects a UserAssignment
-        ssd_set = models.RbacSsdSet.objects.get(id=1)
+        ssd_set = RbacSsdSet.objects.get(id=1)
         ssd_set.cardinality=3
         self.assertRaises(ValidationError, ssd_set.save)
         
@@ -158,7 +197,7 @@ class RbacBackendTest(TestCase):
         and try to establish the inheritance again (which should raise a
         ValidationError).
         """
-        ssd_set = models.RbacSsdSet.objects.get(id=1)
+        ssd_set = RbacSsdSet.objects.get(id=1)
         ssd_set.cardinality=3
         self.assertRaises(ValidationError, ssd_set.save)
         
@@ -174,7 +213,7 @@ class RbacBackendTest(TestCase):
         that an entire subgraph containing a SSD role is removed (immediate
         inheritance relationship between "Role A" and "Role B").
         """
-        ssd_set = models.RbacSsdSet.objects.get(id=1)
+        ssd_set = RbacSsdSet.objects.get(id=1)
         ssd_set.cardinality=3
         self.assertRaises(ValidationError, ssd_set.save)
         

@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from rbac import functions
 from rbac.models import RbacPermissionProfile, RbacRoleProfile, RbacRole, RbacSsdSet, RbacPermission, RbacUser
+from rbac.utils import testing
 
 def skipWithoutRbacUser(func):
     """
@@ -235,3 +236,36 @@ class RbacBackendTest(TestCase):
         self.assertEqual(functions.AddInheritance(self.role_b, self.role_ssdfour), True)
         with transaction.atomic():
             self.assertRaises(ValidationError, functions.AddInheritance, self.role_b, self.role_c)
+
+
+class RbacUtilsTest(TestCase):
+    """
+    Tests for `rbac.utils`
+    """
+    def test_testing_context_manager(self):
+        with testing.DisableRbacValidationContextManager():
+            role_a = RbacRole.objects.create(name="Role A")
+            role_a.permissions.add(RbacPermission.objects.get(name="opa"))
+            role_b = RbacRole.objects.create(name="Role B")
+            role_b.permissions.add(RbacPermission.objects.get(name="opb"))
+            role_c = RbacRole.objects.create(name="Role C")
+
+            role_a.children.add(role_b)
+
+            # We have disconnected all relevant signal handlers, so the caches should be empty
+            self.assertEqual(RbacRoleProfile.objects.count(), 0)
+            self.assertEqual(RbacPermissionProfile.objects.count(), 0)
+
+            # Since validation is disabled we should now be able to create invalid SSD constraints
+            ssd_set = RbacSsdSet.objects.create(name="Test", cardinality=2)
+            # This should usually trigger a ValidationError
+            ssd_set.roles = RbacRole.objects.all()
+            ssd_set.delete()
+
+        # After leaving the context manager the caches should be populated
+        self.assertGreater(RbacRoleProfile.objects.count(), 0)
+        self.assertGreater(RbacPermissionProfile.objects.count(), 0)
+
+        # ... and the SSD validation should be working again
+        ssd_set = RbacSsdSet.objects.create(name="Test", cardinality=2)
+        self.assertRaises(ValidationError, lambda: ssd_set.roles.add(*RbacRole.objects.all()))

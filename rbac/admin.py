@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.contrib import admin
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
@@ -39,10 +39,10 @@ class RoleAdmin(admin.ModelAdmin):
         
     def get_urls(self):
         urls = super(RoleAdmin, self).get_urls()
-        my_urls = patterns('',
+        my_urls = [
             url(r'^(\d+)/effective_permissions/$', self.view_effective_permissions),
             url(r'^modelpermissions/$', self.view_permissions_by_model, name='rbac_rbacrole_permissions_by_model')
-        )
+        ]
         return my_urls + urls
 
 

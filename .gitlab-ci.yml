@@ -1,11 +1,12 @@
-py27_django18:
-  script:
-    - "virtualenv-2.7 ./py27_django18"
-    - "./py27_django18/bin/pip install -U 'Django>=1.8,<1.9'"
-    - "./py27_django18/bin/python ./runtests.py"
+stages:
+    - test
 
-py27_django19:
-  script:
-    - "virtualenv-2.7 ./py27_django19"
-    - "./py27_django19/bin/pip install -U 'Django>=1.9,<1.10'"
-    - "./py27_django19/bin/python ./runtests.py"
+before_script:
+    - python3.6 -m venv $HOME/tox
+    - $HOME/tox/bin/pip install tox
+
+py27-django:
+    stage: test
+    script: $HOME/tox/bin/tox
+
+

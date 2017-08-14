@@ -537,14 +537,19 @@ class AbstractRbacUser(models.Model):
     whenever 'django.contrib.auth.models.User' cannot be used for whatever
     reasons.
 
-    It does not provide any properties at all - only a minimum set of methods
-    which are required for RBAC operations. It is up to you to define the
-    properties which are needed to work with your application or with Django's
-    build-in admin.
+    Only provides a bare minimum set of fields and methods which are required
+    for RBAC operations while maintaining compatibility with Django's built-in
+    admin interface.
     """
     __rbac_backend = None
     USERNAME_FIELD = 'id'
     REQUIRED_FIELDS = []
+
+    # These fields are required for Django's admin site
+    last_login = models.DateTimeField(_('last login'), blank=True, null=True)
+    is_staff = models.BooleanField(_('staff status'), default=False,
+        help_text=_('Designates whether the user can log into this admin '
+                    'site.'))
     
     class Meta:
         abstract = True

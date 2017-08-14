@@ -10,7 +10,7 @@ class RbacSessionMiddleware(object):
                 " MIDDLEWARE_CLASSES setting to insert"
                 " 'django.contrib.auth.middleware.AuthenticationMiddleware'"
                 " before the RbacSessionMiddleware class.")
-        elif request.user.is_anonymous():
+        elif request.user.is_anonymous:
             #We do not need to initialize RbacSession for anonymous users
             return
         

@@ -34,7 +34,7 @@ class RbacUserBackend(ModelBackend):
     
     
     def has_module_perms(self, user_obj, app_label):
-        if user_obj.is_anonymous():
+        if user_obj.is_anonymous:
             return False
         
         if not hasattr(user_obj, '_rbac_module_permission_cache'):
@@ -54,7 +54,7 @@ class RbacUserBackend(ModelBackend):
 
 
     def has_perm(self, user_obj, perm, obj=None):
-        if user_obj.is_anonymous():
+        if user_obj.is_anonymous:
             return False
         
         if isinstance(perm, RbacPermission):
@@ -132,7 +132,7 @@ class RbacUserBackend(ModelBackend):
         
         @rtype: set
         """
-        if user_obj.is_anonymous():
+        if user_obj.is_anonymous:
             return set()
         
         if obj:

@@ -548,6 +548,7 @@ class AbstractRbacUser(models.Model):
     class Meta:
         abstract = True
 
+    @property
     def is_anonymous(self):
         """
         Always returns False. This is a way of comparing User objects to
@@ -555,6 +556,7 @@ class AbstractRbacUser(models.Model):
         """
         return False
 
+    @property
     def is_authenticated(self):
         """
         Always return True. This is a way to tell if the user has been

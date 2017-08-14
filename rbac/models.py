@@ -14,6 +14,7 @@ from django.utils.html import format_html
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
+from .deprecation import CallableFalse, CallableTrue
 
 logger = getLogger("rbac.models")
 
@@ -554,7 +555,7 @@ class AbstractRbacUser(models.Model):
         Always returns False. This is a way of comparing User objects to
         anonymous users.
         """
-        return False
+        return CallableFalse
 
     @property
     def is_authenticated(self):
@@ -562,7 +563,7 @@ class AbstractRbacUser(models.Model):
         Always return True. This is a way to tell if the user has been
         authenticated in templates.
         """
-        return True
+        return CallableTrue
 
     def get_all_roles(self):
         """
@@ -647,6 +648,22 @@ class RbacUser(AbstractUser):
             from rbac.backends import RbacUserBackend
             self.__rbac_backend = RbacUserBackend()
         return self.__rbac_backend.get_all_permissions(self)
+
+    @property
+    def is_anonymous(self):
+        """
+        Always returns False. This is a way of comparing User objects to
+        anonymous users.
+        """
+        return CallableFalse
+
+    @property
+    def is_authenticated(self):
+        """
+        Always return True. This is a way to tell if the user has been
+        authenticated in templates.
+        """
+        return CallableTrue
 
 
 def _rbac_check_ssd_userassignment(ssd_roles_set, ssd_cardinality):

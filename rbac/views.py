@@ -1,9 +1,11 @@
-from django.template import RequestContext
-from django.shortcuts import render_to_response
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from django.shortcuts import render
 from django.http import Http404, HttpResponseRedirect
 from django.views.decorators.cache import never_cache
 from rbac.forms import ActiveSessionRoleForm
 from rbac.models import RbacSession
+
 
 @never_cache
 def set_active_session_roles(request):
@@ -39,8 +41,5 @@ def set_active_session_roles(request):
         request.session['redir'] = redir
         my_form = ActiveSessionRoleForm(instance=rbac_session)
 
-    return render_to_response('rbac/set_active_roles.html',
-                              {'form': my_form,},
-                              context_instance=RequestContext(request)
-                             )
+    return render(request, 'rbac/set_active_roles.html', {'form': my_form})
 

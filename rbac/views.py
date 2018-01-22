@@ -4,7 +4,8 @@ from django.shortcuts import render
 from django.http import Http404, HttpResponseRedirect
 from django.views.decorators.cache import never_cache
 from rbac.forms import ActiveSessionRoleForm
-from rbac.models import RbacSession
+
+from .session import RbacSession
 
 
 @never_cache
@@ -28,7 +29,7 @@ def set_active_session_roles(request):
         if "cancel" in request.POST:
             return HttpResponseRedirect(redir)
 
-        my_form = ActiveSessionRoleForm(request.POST, instance=rbac_session)
+        my_form = ActiveSessionRoleForm(rbac_session, request.POST)
         if my_form.is_valid():
             my_form.save()
             return HttpResponseRedirect(redir)
@@ -39,7 +40,7 @@ def set_active_session_roles(request):
         #Store redir in session, because GE/REFERER will be lost when
         # POSTING form data.
         request.session['redir'] = redir
-        my_form = ActiveSessionRoleForm(instance=rbac_session)
+        my_form = ActiveSessionRoleForm(rbac_session)
 
     return render(request, 'rbac/set_active_roles.html', {'form': my_form})
 

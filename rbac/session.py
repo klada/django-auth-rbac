@@ -38,7 +38,7 @@ class RbacSession(object):
         self._django_session = django_session
 
         # A Django session with previously selected roles was passed in. Restore the selected roles from the session.
-        if self.DJANGO_SESSION_KEY in self._django_session:
+        if self._django_session and self.DJANGO_SESSION_KEY in self._django_session:
             role_qs = user.get_all_roles().filter(pk__in=self._django_session[self.DJANGO_SESSION_KEY])
             new_session = False
         else:

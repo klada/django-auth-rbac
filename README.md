@@ -24,7 +24,7 @@ An RBAC session is started whenever a user logs in. Within this session the user
 
 Requirements
 ------------
-* Django 1.7 or higher
+* Django 1.10 or higher
 * Django components:
     - Contenttypes framework
     - Session framework

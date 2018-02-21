@@ -43,11 +43,6 @@ class DisableRbacValidationContextManager(object):
             "dispatch_uid": "rbac.rbac_role_children_changed"
         },
         {
-            "receiver": models._rbac_session_validate_roles,
-            "sender": models.RbacSession.active_roles.through,
-            "dispatch_uid": "rbac.rbac_session_validate_roles"
-        },
-        {
             "receiver": models._rbac_role_children_validate,
             "sender": models.RbacRole.children.through,
             "dispatch_uid": "rbac.rbac_role_children_validate"

@@ -74,7 +74,7 @@ class RoleAdmin(admin.ModelAdmin):
             permissions[app_label][model].append(permission)
         
         permissions = mark_safe(json.dumps(permissions, sort_keys=True))
-            
+
         return TemplateResponse(
             request, 
             'rbac/admin_effective_permissions.html',

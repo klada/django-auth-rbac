@@ -403,94 +403,6 @@ class RbacPermissionProfile(AbstractBaseModel):
         logger.debug("Finished creating RbacPermissionProfile")
 
 
-class RbacSession(AbstractBaseModel):
-    """
-    This model represents the RBAC session for a user. It allows the user to
-    set active roles for a session.
-
-    The default set of roles for a session can be controlled through the
-    setting 'RBAC_DEFAULT_ROLES'.
-    """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True)
-    # Use NULL for frontend sessions (multiple sessions per user allowed) and
-    # True for backend sessions. This way the database can check for uniqueness.
-    backend_session = models.NullBooleanField(default=True) 
-    active_roles = models.ManyToManyField(RbacRole)
-    expire_date = models.DateTimeField(editable=False)
-
-
-    class Meta:
-        app_label = 'rbac'
-        db_table = 'auth_rbac_session'
-        unique_together = ('user', 'backend_session')
-        verbose_name = _("RBAC session")
-        verbose_name_plural = _("RBAC sessions")
-
-
-    def __init__(self, *args, **kwargs):
-        super(RbacSession, self).__init__(*args, **kwargs)
-        
-        if self.expire_date is None:
-            self.expire_date = datetime.now() + timedelta(seconds=settings.SESSION_COOKIE_AGE)
-
-
-    def _activate_default_roles(self):
-        if not self.user:
-            return
-
-        if hasattr(settings, "RBAC_DEFAULT_ROLES"):
-            default_roles = settings.RBAC_DEFAULT_ROLES
-            if isinstance(default_roles, str) and\
-               default_roles.lower() == 'all':
-                pass
-            elif len(default_roles) > 0:
-                self.active_roles=self.user.get_all_roles().filter(name__in=default_roles)
-                return
-
-        # Activate all of the user's roles, if settinigs.RBAC_DEFAULT_ROLES
-        # was not set.
-        self.active_roles=self.user.get_all_roles()
-
-
-    def _has_perm(self, permission):
-        """
-        Checks if the specified permission can be obtained within this session.
-        
-        @type permission: RbacPermission
-        @rtype: bool
-        """
-        return RbacPermissionProfile.objects.filter(
-                   permission=permission,
-                   role__in=self.active_roles.all()
-               ).count() > 0
-    
-    @staticmethod
-    def clear_expired():
-        """
-        Removes expired RBAC sessions from the database.
-        """
-        if settings.USE_TZ:
-            now = datetime.utcnow().replace(tzinfo=utc)
-        else:
-            now = datetime.now()
-        RbacSession.objects.filter(expire_date__lt=now).delete()
-    
-    def save(self, *args, **kwargs):
-        """
-        Saves the session and assigns the default set of active roles for
-        new sessions.
-        """
-        if self.pk:
-            new_session = False
-        else:
-            new_session = True
-        self.full_clean()
-        super(RbacSession, self).save(*args, **kwargs)
-
-        if new_session:
-            self._activate_default_roles()
-
-
 class RbacSsdSet(AbstractBaseModel):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
@@ -836,21 +748,6 @@ def _rbac_role_children_changed(sender, instance, action, reverse, model, pk_set
         RbacPermissionProfile.create()
 
 
-@receiver(models.signals.m2m_changed, sender=RbacSession.active_roles.through,
-          dispatch_uid="rbac.rbac_session_validate_roles")
-def _rbac_session_validate_roles(sender, instance, action, reverse, model, pk_set, **kwargs):
-    """
-    Makes sure that only valid roles are assigned to an RbacSession.
-
-    @raise ValidationError: When trying to assign a role to a session which is
-                            not assigned to the user.
-    """
-    if action == 'pre_add':
-        if instance.user.get_all_roles().filter(id__in=pk_set).count() != len(pk_set):
-            raise ValidationError(
-               "At least one role is not assigned to the session user!")
-
-
 @receiver(models.signals.m2m_changed, sender=RbacRole.children.through,
           dispatch_uid="rbac.rbac_role_children_validate")
 def _rbac_role_children_validate(sender, instance, action, reverse, model, pk_set, **kwargs):
@@ -993,33 +890,4 @@ def _rbac_ssd_enforcement(instance, action, pk_set, **kwargs):
             raise ValidationError(
                "A static separation of duty policy prevents you from adding"
                " this role!")
-
-
-@receiver(models.signals.m2m_changed, sender=RbacUserAssignment.roles.through,
-          dispatch_uid="rbac.rbac_userassignment_roles_changed")
-def _rbac_userassignment_roles_changed(sender, instance, action, reverse, model, pk_set, **kwargs):
-    """
-    When roles were added or removed from the RbacUserAssignment we also have
-    to add/remove them from the user's sessions.
-    """
-    if action == 'post_add':
-        RbacSession.objects.filter(user=instance.user, backend_session=True).delete()
-    
-    if action == 'post_remove':
-        RbacSession.objects.filter(user=instance.user, active_roles__in=pk_set).delete()
-    
-    if action == 'post_clean':
-        RbacSession.objects.filter(user=instance.user).delete()
-
-
-@receiver(models.signals.post_delete, sender=RbacUserAssignment,
-          dispatch_uid="rbac.rbac_userassignment_delete")
-def _rbac_userassignment_delete(sender, instance, **kwargs):
-    """
-    Makes sure that RbacSessions are invalidated when removing a
-    RbacUserAssignment.
-    """
-    RbacSession.objects.filter(user=instance.user).delete()
-
-
 

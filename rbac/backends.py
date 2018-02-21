@@ -1,11 +1,15 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, unicode_literals
+
 import inspect
 import itertools
 import logging
+
 from django.contrib.auth.backends import ModelBackend, RemoteUserBackend
 from django.core.exceptions import ObjectDoesNotExist
-from rbac import models
-from rbac.models import RbacPermission, RbacPermissionProfile
 
+from .models import RbacPermission, RbacPermissionProfile
+from .session import RbacSession
 
 logger = logging.getLogger(__name__)
 
@@ -21,17 +25,14 @@ class RbacUserBackendMixin(object):
         """
         Returns a RBAC session for the specified user.
 
-        @rtype: rbac.models.RbacSession
+        :rtype: rbac.session.RbacSession
         """
-        if hasattr(user_obj, '_rbac_session') and \
-           isinstance(user_obj._rbac_session, models.RbacSession) and \
-           user_obj._rbac_session.user == user_obj:
-            #the session belongs to request.user
+        if hasattr(user_obj, '_rbac_session') and isinstance(user_obj._rbac_session, RbacSession):
+            # the session belongs to request.user
+            assert user_obj._rbac_session.user == user_obj
             return user_obj._rbac_session
         else:
-            rbac_session, created = models.RbacSession.objects.get_or_create(user=user_obj, backend_session=True)
-            if created:
-                logger.debug("Created RBAC backend session for user %s." %user_obj.id)
+            rbac_session = RbacSession(user=user_obj)
             logger.info("Using RBAC backend session for user %s." %user_obj.id)
             return rbac_session
     
@@ -43,7 +44,7 @@ class RbacUserBackendMixin(object):
             logger.debug('has_module_perms(): Building app-label permission cache for user %s' %user_obj.pk)
             session = self._get_user_session(user_obj)
             app_labels = RbacPermissionProfile.objects.filter(
-                             role__in=session.active_roles.all()
+                             role__in=session.get_active_role_ids()
                          ).values_list(
                              'permission__content_type__app_label',
                              flat=True
@@ -116,7 +117,7 @@ class RbacUserBackendMixin(object):
         perms = RbacPermission.objects.filter(
                  content_type__app_label=app_label,
                  content_type__model=model,
-                 rbacpermissionprofile__role__in=session.active_roles.all()
+                 rbacpermissionprofile__role__in=session.get_active_role_ids()
                 ).values_list('name', flat=True)
         return set(itertools.imap(lambda x: '%s.%s_%s' %(app_label, x, model), perms))
 
@@ -141,7 +142,7 @@ class RbacUserBackendMixin(object):
             logger.debug('get_all_permissions(): Building permission cache for user %s' %user_obj.pk)
             session = self._get_user_session(user_obj)
             perms = RbacPermission.objects.filter(
-                     rbacpermissionprofile__role__in=session.active_roles.all()
+                     rbacpermissionprofile__role__in=session.get_active_role_ids()
                     ).select_related(
                      'content_type'
                     ).values_list(

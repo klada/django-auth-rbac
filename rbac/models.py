@@ -19,8 +19,8 @@ from .deprecation import CallableFalse, CallableTrue
 logger = getLogger("rbac.models")
 
 class AbstractBaseModel(models.Model):
-    touch_date = models.DateTimeField(editable=False, auto_now_add=True)
-    create_date = models.DateTimeField(editable=False, auto_now=True)
+    touch_date = models.DateTimeField(editable=False, auto_now=True)
+    create_date = models.DateTimeField(editable=False, auto_now_add=True)
 
     class Meta:
         abstract = True

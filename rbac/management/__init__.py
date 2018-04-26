@@ -64,7 +64,7 @@ def create_permissions(app_config, verbosity, **kwargs):
     RbacPermission.objects.bulk_create(objs)
     if verbosity >= 2:
         for obj in objs:
-            print "Adding permission '%s'" % obj
+            print("Adding permission '%s'" % obj)
 
 
 # Do not add permissions to "auth_permission", as it is not used

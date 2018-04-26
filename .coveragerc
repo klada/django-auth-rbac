@@ -1,0 +1,15 @@
+[run]
+source = .
+
+[report]
+show_missing = True
+precision = 1
+include =
+    rbac/*
+
+omit =
+    */tests/*
+    */migrations/*
+
+exclude_lines =
+    pragma: no cover

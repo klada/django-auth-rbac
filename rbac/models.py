@@ -1,7 +1,10 @@
 from datetime import datetime, timedelta
 from logging import getLogger
 import itertools
-from Queue import Queue
+try: # python2
+    from Queue import Queue
+except ImportError:
+    from queue import Queue
 
 from django.db import connection, models, transaction
 from django.db.models import Q
@@ -17,6 +20,11 @@ from django.utils.translation import ugettext
 from .deprecation import CallableFalse, CallableTrue
 
 logger = getLogger("rbac.models")
+
+# python3 compat
+if not hasattr(itertools, 'imap'):
+    itertools.imap = map
+
 
 class AbstractBaseModel(models.Model):
     touch_date = models.DateTimeField(editable=False, auto_now=True)

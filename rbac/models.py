@@ -3,7 +3,13 @@ from __future__ import print_function, unicode_literals
 
 from datetime import datetime, timedelta
 from logging import getLogger
-import itertools
+
+# Python3 does not have itertools.imap
+try:
+    from itertools import imap
+except ImportError:
+    imap = map
+
 try: # python2
     from Queue import Queue
 except ImportError:
@@ -24,10 +30,6 @@ from django.utils.translation import ugettext
 from .deprecation import CallableFalse, CallableTrue
 
 logger = getLogger("rbac.models")
-
-# python3 compat
-if not hasattr(itertools, 'imap'):
-    itertools.imap = map
 
 
 class AbstractBaseModel(models.Model):
@@ -624,7 +626,7 @@ def _rbac_check_ssd_userassignment(ssd_roles_set, ssd_cardinality):
     parameters would break an existing RbacUserAssignment. 
     """
     #get the ids of the roles which apply to this SSD set
-    ssd_roles_id = ', '.join(itertools.imap(lambda x: str(x), ssd_roles_set))
+    ssd_roles_id = ', '.join(imap(lambda x: str(x), ssd_roles_set))
 
     sql = "SELECT\
             COUNT(role_id) AS ssd_cardinality\
@@ -682,7 +684,7 @@ def _rbac_check_role_ssd_ua(node_id, ssd_roles_set, ssd_cardinality):
     @raise ValidationError: When the SSD set specified by the provided
     parameters would break an existing RbacUserAssignment. 
     """
-    ssd_roles_id = ', '.join(itertools.imap(lambda x: str(x), ssd_roles_set))
+    ssd_roles_id = ', '.join(imap(lambda x: str(x), ssd_roles_set))
 
     sql = "SELECT\
             COUNT(role_id) AS ssd_cardinality\
@@ -876,7 +878,7 @@ def _rbac_ssd_enforcement(instance, action, pk_set, **kwargs):
         user_roles_id=list(user_roles.values_list('id', flat=True))
         user_childroles_id = list(RbacRoleProfile.objects.filter(parent__id__in=user_roles_id).values_list('child', flat=True))
         user_roles_id.extend(user_childroles_id)
-        sql_in = ', '.join(itertools.imap(lambda x: str(x), set(user_roles_id)))
+        sql_in = ', '.join(imap(lambda x: str(x), set(user_roles_id)))
         
         sql = "SELECT\
                 SUM(CASE WHEN auth_rbac_ssdset_roles.rbacrole_id IN ("+sql_in+") THEN 1 ELSE 0 END)\

@@ -1,12 +1,26 @@
 stages:
     - test
 
-before_script:
-    - python3.6 -m venv $HOME/tox
-    - $HOME/tox/bin/pip install tox
+variables:
+  TOX: "/opt/venv/python3.6/tox/bin/tox"
 
-py27-django:
+py27-django110:
     stage: test
-    script: $HOME/tox/bin/tox
+    script: $TOX -e 'py27-django110'
 
+py27-django111:
+    stage: test
+    script: $TOX -e 'py27-django111'
+
+py36-django110:
+    stage: test
+    script: $TOX -e 'py36-django110'
+
+py36-django111:
+    stage: test
+    script: $TOX -e 'py36-django111'
+
+py36-django20:
+    stage: test
+    script: $TOX -e 'py36-django20'
 

@@ -66,7 +66,7 @@ class RbacBackendTest(TestCase):
         ssdset = RbacSsdSet.objects.create(
             name="Test SSD", description="This SSD set is used for testing SSD enforcement", cardinality=4
         )
-        ssdset.roles = RbacRole.objects.filter(name__startswith="Role SSD")
+        ssdset.roles.set(RbacRole.objects.filter(name__startswith="Role SSD"))
 
     def setUp(self):
         RbacRoleProfile.create()
@@ -259,7 +259,7 @@ class RbacUtilsTest(TestCase):
             # Since validation is disabled we should now be able to create invalid SSD constraints
             ssd_set = RbacSsdSet.objects.create(name="Test", cardinality=2)
             # This should usually trigger a ValidationError
-            ssd_set.roles = RbacRole.objects.all()
+            ssd_set.roles.set(RbacRole.objects.all())
             ssd_set.delete()
 
         # After leaving the context manager the caches should be populated

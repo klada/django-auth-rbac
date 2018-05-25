@@ -144,7 +144,7 @@ class Migration(migrations.Migration):
                 ('touch_date', models.DateTimeField(auto_now_add=True)),
                 ('create_date', models.DateTimeField(auto_now=True)),
                 ('roles', models.ManyToManyField(to='rbac.RbacRole')),
-                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL)),
+                ('user', models.OneToOneField(on_delete=models.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'db_table': 'auth_rbac_userassignment',

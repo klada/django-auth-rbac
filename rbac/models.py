@@ -438,7 +438,7 @@ class RbacSsdSet(AbstractBaseModel):
 
 
 class RbacUserAssignment(AbstractBaseModel):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     roles = models.ManyToManyField(RbacRole)
 
     def __unicode__(self):

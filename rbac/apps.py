@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, unicode_literals
+
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
 from rbac.management import create_permissions

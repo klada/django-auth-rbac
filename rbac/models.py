@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, unicode_literals
+
 from datetime import datetime, timedelta
 from logging import getLogger
 import itertools
@@ -13,6 +16,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.contenttypes.models import ContentType
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.html import format_html
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
@@ -32,8 +36,7 @@ class AbstractBaseModel(models.Model):
 
     class Meta:
         abstract = True
-    
-    
+
     def save(self, *args, **kwargs):
         self.full_clean()
         super(AbstractBaseModel, self).save(*args, **kwargs)
@@ -52,18 +55,19 @@ class RbacPermissionManager(models.Manager):
         )
 
 
+@python_2_unicode_compatible
 class RbacPermission(AbstractBaseModel):
     name = models.CharField(max_length=100, db_index=True, verbose_name=_("Name"))
     description = models.TextField(blank=True, verbose_name=_("Description"))
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, verbose_name=_("Model"))
     objects = RbacPermissionManager()
 
-
-    def __unicode__(self):
-        return u"%s | %s | %s" % (
-            unicode(self.content_type.app_label),
-            unicode(self.content_type),
-            unicode(self.name))
+    def __str__(self):
+        return "%s | %s | %s" % (
+            self.content_type.app_label,
+            self.content_type,
+            self.name
+        )
 
 
     class Meta:
@@ -173,6 +177,7 @@ class RbacRoleManager(models.Manager):
         return self.get(name=name)
 
 
+@python_2_unicode_compatible
 class RbacRole(AbstractBaseModel):
     """
     A role that can be assigned to users and other roles.
@@ -186,21 +191,21 @@ class RbacRole(AbstractBaseModel):
 
     objects = RbacRoleManager.from_queryset(RbacRoleQuerySet)()
 
-    def __unicode__(self):
-        if self.displayName:
-            return self.displayName
-        else:
-            return self.name
-
-    def __init__(self, *args, **kwargs):
-        super(RbacRole, self).__init__(*args, **kwargs)
-
     class Meta:
         app_label = 'rbac'
         db_table = 'auth_rbac_role'
         verbose_name = _("RBAC role")
         verbose_name_plural = _("RBAC roles")
         ordering = [ 'name' ]
+
+    def __init__(self, *args, **kwargs):
+        super(RbacRole, self).__init__(*args, **kwargs)
+
+    def __str__(self):
+        if self.displayName:
+            return self.displayName
+        else:
+            return self.name
 
     def _admin_effective_permissions(self):
         return format_html(
@@ -268,6 +273,7 @@ class RbacRole(AbstractBaseModel):
         return (self.name, )
  
 
+@python_2_unicode_compatible
 class RbacRoleProfile(AbstractBaseModel):
     """
     This model acts as a flat role hierarchy and serves as a cache.
@@ -283,8 +289,8 @@ class RbacRoleProfile(AbstractBaseModel):
         db_table = 'auth_rbac_roleprofile'
         unique_together = ('parent', 'child')
   
-    def __unicode__(self):
-        return u"%s: %s" %(self.parent, self.child)
+    def __str__(self):
+        return "%s: %s" % (self.parent, self.child)
   
     @staticmethod
     def create():
@@ -352,6 +358,7 @@ class RbacRoleProfile(AbstractBaseModel):
         logger.debug("Finished creating RbacRoleProfile")
 
 
+@python_2_unicode_compatible
 class RbacPermissionProfile(AbstractBaseModel):
     """
     The RbacPermissionProfile serves as a cache for role <-> permission relations.
@@ -361,20 +368,17 @@ class RbacPermissionProfile(AbstractBaseModel):
     """
     role = models.ForeignKey(RbacRole, db_index=True, on_delete=models.CASCADE)
     permission = models.ForeignKey(RbacPermission, db_index=True, on_delete=models.CASCADE)
-    
-        
+
     class Meta:
         app_label = 'rbac'
         db_table = 'auth_rbac_permissionprofile'
         unique_together = ('role', 'permission')
         verbose_name = _("RBAC role profile")
         verbose_name_plural = _("RBAC role profiles")
-   
 
-    def __unicode__(self):
-        return u'%s: %s' %(self.role.name, self.permission.name)
+    def __str__(self):
+        return '%s: %s' % (self.role.name, self.permission.name)
 
-    
     @staticmethod
     def create():
         """
@@ -437,12 +441,13 @@ class RbacSsdSet(AbstractBaseModel):
                                           )
 
 
+@python_2_unicode_compatible
 class RbacUserAssignment(AbstractBaseModel):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     roles = models.ManyToManyField(RbacRole)
 
-    def __unicode__(self):
-        return u'RBAC role assignment for user "%s"' %self.user
+    def __str__(self):
+        return 'RBAC role assignment for user "%s"' % self.user
 
     class Meta:
         app_label = 'rbac'

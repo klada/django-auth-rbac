@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, unicode_literals
+
 from django.contrib.auth.decorators import user_passes_test
 from rbac.exceptions import RbacPermissionDenied
+
 
 def rbac_permission_required(operation, model):
     """
@@ -16,4 +20,3 @@ def rbac_permission_required(operation, model):
         else:
             raise RbacPermissionDenied()
     return user_passes_test(check_perms)
-

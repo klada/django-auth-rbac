@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, unicode_literals
+
 from collections import OrderedDict
 from django.conf.urls import url
 from django.contrib import admin

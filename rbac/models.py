@@ -55,7 +55,7 @@ class RbacPermissionManager(models.Manager):
 class RbacPermission(AbstractBaseModel):
     name = models.CharField(max_length=100, db_index=True, verbose_name=_("Name"))
     description = models.TextField(blank=True, verbose_name=_("Description"))
-    content_type = models.ForeignKey(ContentType, verbose_name=_("Model"))
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, verbose_name=_("Model"))
     objects = RbacPermissionManager()
 
 
@@ -275,8 +275,8 @@ class RbacRoleProfile(AbstractBaseModel):
     It caches all (direct and indirect) children of a role and can be used for
     both child and parent lookup.
     """
-    parent = models.ForeignKey(RbacRole, db_index=True, related_name="rbacroleprofile_parent")
-    child = models.ForeignKey(RbacRole, db_index=True, related_name="rbacroleprofile_child")
+    parent = models.ForeignKey(RbacRole, db_index=True, on_delete=models.CASCADE, related_name="rbacroleprofile_parent")
+    child = models.ForeignKey(RbacRole, db_index=True, on_delete=models.CASCADE, related_name="rbacroleprofile_child")
 
     class Meta:
         app_label = 'rbac'
@@ -359,8 +359,8 @@ class RbacPermissionProfile(AbstractBaseModel):
     It parses the role graph and stores a role's permissions B{including permissions from child roles}.
     This makes permission lookups pretty fast - even when dealing with complex role graphs.
     """
-    role = models.ForeignKey(RbacRole, db_index=True)
-    permission = models.ForeignKey(RbacPermission, db_index=True)
+    role = models.ForeignKey(RbacRole, db_index=True, on_delete=models.CASCADE)
+    permission = models.ForeignKey(RbacPermission, db_index=True, on_delete=models.CASCADE)
     
         
     class Meta:

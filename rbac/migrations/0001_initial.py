@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
                 ('create_date', models.DateTimeField(auto_now=True)),
                 ('name', models.CharField(max_length=100, verbose_name='Name', db_index=True)),
                 ('description', models.TextField(verbose_name='Description', blank=True)),
-                ('content_type', models.ForeignKey(verbose_name='Model', to='contenttypes.ContentType')),
+                ('content_type', models.ForeignKey(verbose_name='Model', on_delete=models.CASCADE, to='contenttypes.ContentType')),
             ],
             options={
                 'ordering': ('content_type__app_label', 'content_type__model', 'name'),
@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('touch_date', models.DateTimeField(auto_now_add=True)),
                 ('create_date', models.DateTimeField(auto_now=True)),
-                ('permission', models.ForeignKey(to='rbac.RbacPermission')),
+                ('permission', models.ForeignKey(on_delete=models.CASCADE, to='rbac.RbacPermission')),
             ],
             options={
                 'db_table': 'auth_rbac_permissionprofile',
@@ -96,8 +96,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('touch_date', models.DateTimeField(auto_now_add=True)),
                 ('create_date', models.DateTimeField(auto_now=True)),
-                ('child', models.ForeignKey(related_name='rbacroleprofile_child', to='rbac.RbacRole')),
-                ('parent', models.ForeignKey(related_name='rbacroleprofile_parent', to='rbac.RbacRole')),
+                ('child', models.ForeignKey(on_delete=models.CASCADE, related_name='rbacroleprofile_child', to='rbac.RbacRole')),
+                ('parent', models.ForeignKey(on_delete=models.CASCADE, related_name='rbacroleprofile_parent', to='rbac.RbacRole')),
             ],
             options={
                 'db_table': 'auth_rbac_roleprofile',
@@ -112,7 +112,7 @@ class Migration(migrations.Migration):
                 ('backend_session', models.NullBooleanField(default=True)),
                 ('expire_date', models.DateTimeField(editable=False)),
                 ('active_roles', models.ManyToManyField(to='rbac.RbacRole')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(on_delete=models.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'db_table': 'auth_rbac_session',
@@ -165,7 +165,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='rbacpermissionprofile',
             name='role',
-            field=models.ForeignKey(to='rbac.RbacRole'),
+            field=models.ForeignKey(on_delete=models.CASCADE, to='rbac.RbacRole'),
         ),
         migrations.AlterUniqueTogether(
             name='rbacsession',

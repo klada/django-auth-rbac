@@ -33,7 +33,7 @@ Installation
 ------------
 1. Add *rbac* to `settings.INSTALLED_APPS`
 2. Set `AUTHENTICATION_BACKENDS` to *rbac.backends.RbacUserBackend* or any subclass of *RbacUserBackend*.
-3. Add *rbac.middleware.RbacSessionMiddleware* to `MIDDLEWARE_CLASSES`.
+3. Add *rbac.middleware.RbacSessionMiddleware* to `MIDDLEWARE`.
 4. **optional:** Configure `RBAC_DEFAULT_ROLES`. This option accepts a tuple of role names which will be activated by default in RBAC sessions. If you omit this setting then all of the user's roles will be activated within a session.
 5. **optional:** If you are using a custom user class, make sure it inherits from *rbac.users.AbstractRbacUser* and set `AUTH_USER_MODEL` to your custom user class. If you omit this setting your user objects will be instances of *RbacUser*, a subclass of django.contrib.auth.models.AbstractUser.
 

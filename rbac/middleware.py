@@ -14,7 +14,7 @@ class RbacSessionMiddleware(MiddlewareMixin):
             raise ImproperlyConfigured(
                 "The RBAC session middleware requires the"
                 " authentication middleware to be installed.  Edit your"
-                " MIDDLEWARE_CLASSES setting to insert"
+                " MIDDLEWARE setting to insert"
                 " 'django.contrib.auth.middleware.AuthenticationMiddleware'"
                 " before the RbacSessionMiddleware class.")
         elif request.user.is_anonymous:
@@ -25,7 +25,7 @@ class RbacSessionMiddleware(MiddlewareMixin):
             raise ImproperlyConfigured(
                 "The RBAC session middleware requires the"
                 " session middleware to be installed.  Edit your"
-                " MIDDLEWARE_CLASSES setting to insert"
+                " MIDDLEWARE setting to insert"
                 " 'django.contrib.sessions.middleware.SessionMiddleware'"
                 " before the RbacSessionMiddleware class.")
 

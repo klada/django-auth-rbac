@@ -4,12 +4,14 @@ from __future__ import print_function, unicode_literals
 from collections import OrderedDict
 from django.conf.urls import url
 from django.contrib import admin
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
-from rbac import models
-from rbac.forms import RbacRoleForm, EffectivePermissionFilterForm
+
+from . import models
+from .forms import RbacRoleForm
+
 
 class TopLevelRoleFilter(admin.SimpleListFilter):
     """
@@ -30,6 +32,7 @@ class TopLevelRoleFilter(admin.SimpleListFilter):
             return queryset.filter(parents_all=None)
         elif self.value() == '0':
             return queryset.exclude(parents_all=None)
+
 
 class RoleAdmin(admin.ModelAdmin):
     form = RbacRoleForm
@@ -120,12 +123,35 @@ class RbacSsdAdmin(admin.ModelAdmin):
 
 class UserAssignmentAdmin(admin.ModelAdmin):
     raw_id_fields = ('user',)
+    list_display = ('__str__', 'get_username', 'get_num_roles')
+    list_select_related = ('user', )
     search_fields = ['user__username', 'roles__name']
     filter_horizontal = ('roles', )
+
+    def get_num_roles(self, obj):
+        """
+        Returns the number of roles assigned to `obj. The QuerySet needs to be annotated with `num_roles` (see
+        `get_queryset()` for the annotation).
+
+        :type obj: RbacUserAssignment
+        :return: The number of roles assigned to `obj`
+        :rtype: int
+        """
+        return obj.num_roles
+    get_num_roles.admin_order_field = "num_roles"
+    get_num_roles.short_description = _("Number of roles")
+
+    def get_queryset(self, request):
+        qs = super(UserAssignmentAdmin, self).get_queryset(request)
+        return qs.annotate(num_roles=Count("roles"))
+
+    def get_username(self, obj):
+        return obj.user.username
+    get_username.admin_order_field = "user__username"
+    get_username.short_description = _("Username")
 
 
 admin.site.register(models.RbacRole, RoleAdmin)
 admin.site.register(models.RbacPermission)
 admin.site.register(models.RbacUserAssignment, UserAssignmentAdmin)
 admin.site.register(models.RbacSsdSet, RbacSsdAdmin)
-#admin.site.register(models.RoleChildren, RoleHierarchyAdmin)

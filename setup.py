@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(name='django-auth-rbac',
-    version='0.1',
+    version='0.2',
     description='An attempt of implementing role-based access control (ANSI/INCITS 359-2004) for Django',
     author='Daniel Klaffenbach',
     url='https://github.com/klada/django-auth-rbac',
@@ -16,6 +16,6 @@ setup(name='django-auth-rbac',
         ]
     },
     install_requires=[
-        'django>=1.7',
+        'django>=1.10',
     ],
 )

@@ -152,7 +152,7 @@ class RbacRoleQuerySet(models.QuerySet):
 
         num_iterations = 0
         while roles_num_children:
-            for role_pk, num_children in roles_num_children.items():
+            for role_pk, num_children in list(roles_num_children.items()):
                 if num_children == 0:
                     yield roles[role_pk]
                     del roles_num_children[role_pk]

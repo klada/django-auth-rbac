@@ -25,6 +25,7 @@ class CallableBool:
         )
         return self.value
 
+    # pylint: disable=nonzero-method
     def __nonzero__(self):  # Python 2 compatibility
         return self.value
 

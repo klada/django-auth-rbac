@@ -1,19 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, unicode_literals
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from logging import getLogger
-
-# Python3 does not have itertools.imap
-try:
-    from itertools import imap
-except ImportError:
-    imap = map
-
-try: # python2
-    from Queue import Queue
-except ImportError:
-    from queue import Queue
+from queue import Queue
 
 from django.db import connection, models, transaction
 from django.db.models import Q
@@ -22,11 +12,10 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.contenttypes.models import ContentType
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.html import format_html
 from django.utils.timezone import utc
-from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import ugettext
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext
 from .deprecation import CallableFalse, CallableTrue
 
 logger = getLogger("rbac.models")
@@ -57,7 +46,6 @@ class RbacPermissionManager(models.Manager):
         )
 
 
-@python_2_unicode_compatible
 class RbacPermission(AbstractBaseModel):
     name = models.CharField(max_length=100, db_index=True, verbose_name=_("Name"))
     description = models.TextField(blank=True, verbose_name=_("Description"))
@@ -70,7 +58,6 @@ class RbacPermission(AbstractBaseModel):
             self.content_type,
             self.name
         )
-
 
     class Meta:
         app_label = 'rbac'
@@ -179,7 +166,6 @@ class RbacRoleManager(models.Manager):
         return self.get(name=name)
 
 
-@python_2_unicode_compatible
 class RbacRole(AbstractBaseModel):
     """
     A role that can be assigned to users and other roles.
@@ -187,7 +173,7 @@ class RbacRole(AbstractBaseModel):
     name = models.CharField(max_length=255, db_index=True, unique=True)
     description = models.TextField(blank=True)
     displayName = models.CharField(blank=True, max_length=254, verbose_name=_('Display name'))
-    children =  models.ManyToManyField( 'self', symmetrical=False, blank=True)
+    children = models.ManyToManyField( 'self', symmetrical=False, blank=True)
     permissions = models.ManyToManyField(RbacPermission, blank=True)
     children_all = models.ManyToManyField( 'self', symmetrical=False, blank=True, editable=False, through="RbacRoleProfile", related_name="parents_all")
 
@@ -213,7 +199,7 @@ class RbacRole(AbstractBaseModel):
         return format_html(
             '<a href="./{0}/effective_permissions/">{1}</a>',
             self.pk,
-            ugettext('Display effective permissions')
+            gettext('Display effective permissions')
         )
     _admin_effective_permissions.allow_tags = True
     _admin_effective_permissions.short_description = _('Effective permissions')
@@ -227,12 +213,11 @@ class RbacRole(AbstractBaseModel):
         @returns:   set
         """
         parents = []
-        for i in RbacRole.objects.filter( children=self ):
-            parents.append( i )
-            parents.extend( i._get_all_parents_uncached() )
+        for i in RbacRole.objects.filter( children=self):
+            parents.append(i)
+            parents.extend(i._get_all_parents_uncached())
 
-        return set( parents )
-    
+        return set(parents)
     
     def _get_all_children_uncached(self):
         children = [] 
@@ -275,7 +260,6 @@ class RbacRole(AbstractBaseModel):
         return (self.name, )
  
 
-@python_2_unicode_compatible
 class RbacRoleProfile(AbstractBaseModel):
     """
     This model acts as a flat role hierarchy and serves as a cache.
@@ -360,7 +344,6 @@ class RbacRoleProfile(AbstractBaseModel):
         logger.debug("Finished creating RbacRoleProfile")
 
 
-@python_2_unicode_compatible
 class RbacPermissionProfile(AbstractBaseModel):
     """
     The RbacPermissionProfile serves as a cache for role <-> permission relations.
@@ -443,7 +426,6 @@ class RbacSsdSet(AbstractBaseModel):
                                           )
 
 
-@python_2_unicode_compatible
 class RbacUserAssignment(AbstractBaseModel):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     roles = models.ManyToManyField(RbacRole)
@@ -626,7 +608,7 @@ def _rbac_check_ssd_userassignment(ssd_roles_set, ssd_cardinality):
     parameters would break an existing RbacUserAssignment. 
     """
     #get the ids of the roles which apply to this SSD set
-    ssd_roles_id = ', '.join(imap(lambda x: str(x), ssd_roles_set))
+    ssd_roles_id = ', '.join(map(lambda x: str(x), ssd_roles_set))
 
     sql = "SELECT\
             COUNT(role_id) AS ssd_cardinality\
@@ -684,7 +666,7 @@ def _rbac_check_role_ssd_ua(node_id, ssd_roles_set, ssd_cardinality):
     @raise ValidationError: When the SSD set specified by the provided
     parameters would break an existing RbacUserAssignment. 
     """
-    ssd_roles_id = ', '.join(imap(lambda x: str(x), ssd_roles_set))
+    ssd_roles_id = ', '.join(map(lambda x: str(x), ssd_roles_set))
 
     sql = "SELECT\
             COUNT(role_id) AS ssd_cardinality\
@@ -878,7 +860,7 @@ def _rbac_ssd_enforcement(instance, action, pk_set, **kwargs):
         user_roles_id=list(user_roles.values_list('id', flat=True))
         user_childroles_id = list(RbacRoleProfile.objects.filter(parent__id__in=user_roles_id).values_list('child', flat=True))
         user_roles_id.extend(user_childroles_id)
-        sql_in = ', '.join(imap(lambda x: str(x), set(user_roles_id)))
+        sql_in = ', '.join(map(lambda x: str(x), set(user_roles_id)))
         
         sql = "SELECT\
                 SUM(CASE WHEN auth_rbac_ssdset_roles.rbacrole_id IN ("+sql_in+") THEN 1 ELSE 0 END)\

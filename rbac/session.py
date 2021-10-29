@@ -3,7 +3,6 @@ from __future__ import print_function, unicode_literals
 import logging
 
 from django.conf import settings
-from django.utils import six
 
 from .models import RbacPermissionProfile, RbacRole
 
@@ -49,7 +48,7 @@ class RbacSession(object):
             default_roles = getattr(settings, "RBAC_DEFAULT_ROLES", "all")
             # Special case: `RBAC_DEFAULT_ROLES` is not set or set to "all".
             # This means we'll load all roles into the user's session by default
-            if isinstance(default_roles, six.string_types):
+            if isinstance(default_roles, str):
                 if default_roles.lower() == 'all':
                     role_qs = user.get_all_roles()
                 else:

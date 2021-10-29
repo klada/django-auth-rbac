@@ -6,7 +6,6 @@ import logging
 
 from django.contrib.auth.backends import ModelBackend, RemoteUserBackend
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.six.moves import map as imap
 
 from .models import RbacPermission, RbacPermissionProfile
 from .session import RbacSession
@@ -119,7 +118,7 @@ class RbacUserBackendMixin(object):
                  content_type__model=model,
                  rbacpermissionprofile__role__in=session.get_active_role_ids()
                 ).values_list('name', flat=True)
-        return set(imap(lambda x: '%s.%s_%s' %(app_label, x, model), perms))
+        return set(map(lambda x: '%s.%s_%s' %(app_label, x, model), perms))
 
     def get_all_permissions(self, user_obj, obj=None):
         """
@@ -150,7 +149,7 @@ class RbacUserBackendMixin(object):
                      'name',
                      'content_type__model',
                     )
-            user_obj._rbacperm_cache = set(imap(lambda x: '%s.%s_%s' %(x[0], x[1], x[2]), perms))
+            user_obj._rbacperm_cache = set(map(lambda x: '%s.%s_%s' %(x[0], x[1], x[2]), perms))
         else:
             logger.debug('get_all_permissions(): Using permission cache for user %s' %user_obj.pk)
         return user_obj._rbacperm_cache

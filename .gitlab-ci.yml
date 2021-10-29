@@ -2,25 +2,14 @@ stages:
     - test
 
 variables:
+  LD_LIBRARY_PATH: /opt/sqlite-compat-django/lib/
   TOX: "/opt/venv/python3.6/tox/bin/tox"
 
-py27-django110:
+py36-django22:
     stage: test
-    script: $TOX -e 'py27-django110'
+    script: $TOX -e 'py36-django22'
 
-py27-django111:
+py36-django30:
     stage: test
-    script: $TOX -e 'py27-django111'
-
-py36-django110:
-    stage: test
-    script: $TOX -e 'py36-django110'
-
-py36-django111:
-    stage: test
-    script: $TOX -e 'py36-django111'
-
-py36-django20:
-    stage: test
-    script: $TOX -e 'py36-django20'
+    script: $TOX -e 'py36-django30'
 

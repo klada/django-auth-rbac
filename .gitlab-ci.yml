@@ -13,3 +13,11 @@ py36-django30:
     stage: test
     script: $TOX -e 'py36-django30'
 
+py36-django31:
+    stage: test
+    script: $TOX -e 'py36-django31'
+
+py36-django32:
+    stage: test
+    script: $TOX -e 'py36-django32'
+

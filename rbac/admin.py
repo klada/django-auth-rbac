@@ -2,7 +2,7 @@
 from __future__ import print_function, unicode_literals
 
 from collections import OrderedDict
-from django.conf.urls import url
+from django.urls import re_path
 from django.contrib import admin
 from django.db.models import Prefetch, Count
 from django.shortcuts import get_object_or_404
@@ -46,8 +46,8 @@ class RoleAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super(RoleAdmin, self).get_urls()
         my_urls = [
-            url(r'^(\d+)/effective_permissions/$', self.view_effective_permissions),
-            url(r'^modelpermissions/$', self.view_permissions_by_model, name='rbac_rbacrole_permissions_by_model')
+            re_path(r'^(\d+)/effective_permissions/$', self.view_effective_permissions),
+            re_path(r'^modelpermissions/$', self.view_permissions_by_model, name='rbac_rbacrole_permissions_by_model')
         ]
         return my_urls + urls
 

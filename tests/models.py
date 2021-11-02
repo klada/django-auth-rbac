@@ -1,9 +1,11 @@
-from django.db.models import Model
+from django.db.models import AutoField, Model
 
 class TestModel(Model):
     """
     This is a dummy model only used for testing.
     """
+    id = AutoField(primary_key=True)
+
     class Meta:
         permissions = (
             ('opa', 'Operation allowed by role A'),

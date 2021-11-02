@@ -24,7 +24,7 @@ An RBAC session is started whenever a user logs in. Within this session the user
 
 Requirements
 ------------
-* Django 1.10 or higher
+* Django 2.2 or higher
 * Django components:
     - Contenttypes framework
     - Session framework
@@ -51,7 +51,7 @@ You can use django-auth-rbac pretty much like *django.contrib.auth*. The syntax 
         raise PermissionDenied()
 
 
-Since RBAC permissions are tied to a specific model you should not add permissions manually. They are added automatically when running *syncdb*. Just like with *django.contrib.auth* you can specify additional model-permissions [directly in the model's **Meta** class](http://docs.djangoproject.com/en/1.5/ref/models/options/#permissions).
+Since RBAC permissions are tied to a specific model you should not add permissions manually. They are added automatically when running *syncdb*. Just like with *django.contrib.auth* you can specify additional model-permissions [directly in the model's **Meta** class](http://docs.djangoproject.com/en/3.2/ref/models/options/#permissions).
 
 
 Limitations
